@@ -1,0 +1,9 @@
+entity_child_count = 1
+entity_start_count = 100
+grid_width = 100
+grid_height = 100
+neuron_connection_count = 4
+neuron_fire_threshold = 1.0
+neuron_signal_range = 4.0
+render_pixel_scale = 8
+sim_generation_steps = 100
