@@ -108,7 +108,7 @@ impl Automata for LifeSim {
                 continue;
             }
 
-            if is_in_killzone(self.grid_width, entity.x, generation_time) {
+            if is_in_killzone(self.grid_width, entity.x(), generation_time) {
                 entity.kill();
             } else {
                 entity.update(self.grid_width, self.grid_height, generation_time);
@@ -118,7 +118,7 @@ impl Automata for LifeSim {
         if self.sim_current_step > self.sim_generation_steps {
             let selected = self.entities.iter().filter(|e| {
                 // Select if entity is in right 40% of grid and is alive.
-                e.is_alive() && e.x > self.grid_width - (self.grid_width as f32 * 0.4) as u32
+                e.is_alive() && e.x() > self.grid_width - (self.grid_width as f32 * 0.4) as u32
             });
 
             let mut next_generation = Vec::new();
@@ -157,7 +157,7 @@ impl Automata for LifeSim {
                 continue;
             }
 
-            let index = grid_coords_to_index(entity.x, entity.y, self.grid_width);
+            let index = grid_coords_to_index(entity.x(), entity.y(), self.grid_width);
 
             let output_sum = entity
                 .brain

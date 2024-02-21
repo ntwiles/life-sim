@@ -3,8 +3,8 @@ use super::output_neuron::OutputNeuronKind;
 
 // TODO: Make these private.
 pub struct Entity {
-    pub x: u32,
-    pub y: u32,
+    x: u32,
+    y: u32,
     pub brain: NeuralNetwork,
     is_alive: bool,
 }
@@ -81,5 +81,13 @@ impl Entity {
 
     pub fn is_alive(&self) -> bool {
         self.is_alive
+    }
+
+    pub fn x(&self) -> u32 {
+        self.x
+    }
+
+    pub fn y(&self) -> u32 {
+        self.y
     }
 }
