@@ -2,27 +2,22 @@ use std::fmt;
 #[derive(Clone, Copy, Debug)]
 pub struct InputNeuron {
     kind: InputNeuronKind,
-    signal_range: f32,
 }
 
 impl InputNeuron {
-    pub fn new(kind: InputNeuronKind, signal_range: f32) -> Self {
-        Self { kind, signal_range }
+    pub fn new(kind: InputNeuronKind) -> Self {
+        Self { kind }
     }
 
     pub fn update(&self, generation_time: f32) -> f32 {
         match self.kind {
-            InputNeuronKind::Random => self.unit_to_range(rand::random::<f32>()),
-            InputNeuronKind::Time => self.unit_to_range(generation_time),
+            InputNeuronKind::Random => rand::random::<f32>(),
+            InputNeuronKind::Time => generation_time,
         }
     }
 
     pub fn kind(&self) -> InputNeuronKind {
         self.kind
-    }
-
-    fn unit_to_range(&self, unit: f32) -> f32 {
-        unit * (self.signal_range * 2.0) - self.signal_range
     }
 }
 

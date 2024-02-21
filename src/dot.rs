@@ -12,10 +12,13 @@ pub fn neural_net_to_dot(brain: &NeuralNetwork) -> String {
         let mut graph = writer.digraph();
 
         for (i, input) in brain.input_layer.iter().enumerate() {
-            let connections = brain.connections.iter().filter(|(input, _)| *input == i);
+            let connections = brain
+                .connections
+                .iter()
+                .filter(|((input, _), _)| *input == i);
 
             for connection in connections {
-                let output = &brain.output_layer[connection.1];
+                let output = &brain.output_layer[connection.0 .1];
                 graph.edge(input.kind().to_string(), output.kind().to_string());
             }
         }

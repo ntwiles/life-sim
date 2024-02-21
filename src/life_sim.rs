@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use cellular_automata::{
     automata::Automata,
@@ -24,7 +24,6 @@ pub struct LifeSim {
 
     neuron_connection_count: usize,
     neuron_fire_threshold: f32,
-    neuron_signal_range: f32,
 
     render_pixel_scale: u32,
     render_color_gradient: Gradient,
@@ -50,28 +49,31 @@ impl LifeSim {
         for _ in 0..settings.entity_start_count() {
             let (x, y) = get_random_position(&used_positions, grid_width, grid_height);
 
-            let mut connections = HashSet::<(usize, usize)>::new();
+            let mut connections = HashMap::<(usize, usize), f32>::new();
 
             // Create random connections from input to output.
             for _ in 0..neuron_connection_count {
                 let mut input;
                 let mut output;
 
+                let weight =
+                    rand::random::<f32>() * (2.0 * neuron_signal_range) - neuron_signal_range;
+
                 loop {
                     input = rand::random::<usize>() % InputNeuronKind::count();
                     output = rand::random::<usize>() % OutputNeuronKind::count();
 
-                    if connections.contains(&(input, output)) {
+                    if connections.contains_key(&(input, output)) {
                         continue;
                     } else {
                         break;
                     }
                 }
 
-                connections.insert((input, output));
+                connections.insert((input, output), weight);
             }
 
-            let brain = NeuralNetwork::new(connections, neuron_signal_range, neuron_fire_threshold);
+            let brain = NeuralNetwork::new(connections, neuron_fire_threshold);
             let entity = Entity::new(x, y, brain);
 
             entities.push(entity);
@@ -86,7 +88,6 @@ impl LifeSim {
             grid_height,
             neuron_connection_count,
             neuron_fire_threshold,
-            neuron_signal_range,
             render_pixel_scale: settings.render_pixel_scale(),
             render_color_gradient,
             sim_current_step: 0,
@@ -130,7 +131,6 @@ impl Automata for LifeSim {
 
                     let brain = NeuralNetwork::new(
                         entity.brain.connections.clone(),
-                        self.neuron_signal_range,
                         self.neuron_fire_threshold,
                     );
 
@@ -163,7 +163,7 @@ impl Automata for LifeSim {
                 .brain
                 .connections
                 .iter()
-                .fold(0, |acc, (_, v)| acc + v);
+                .fold(0, |acc, ((_, v), _)| acc + v);
 
             let max_sum = OutputNeuronKind::count() * self.neuron_connection_count;
 
