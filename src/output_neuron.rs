@@ -21,7 +21,7 @@ impl OutputNeuron {
     }
 
     pub fn fire(&mut self) -> bool {
-        let will_fire = self.sum >= self.fire_threshold;
+        let will_fire = self.sum.tanh() >= self.fire_threshold;
         self.sum = 0.0;
         will_fire
     }

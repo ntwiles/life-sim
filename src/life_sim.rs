@@ -117,8 +117,8 @@ impl Automata for LifeSim {
 
         if self.sim_current_step > self.sim_generation_steps {
             let selected = self.entities.iter().filter(|e| {
-                // Select if entity is in right 30% of grid and is alive.
-                e.is_alive() && e.x > self.grid_width - (self.grid_width as f32 * 0.3) as u32
+                // Select if entity is in right 40% of grid and is alive.
+                e.is_alive() && e.x > self.grid_width - (self.grid_width as f32 * 0.4) as u32
             });
 
             let mut next_generation = Vec::new();
@@ -223,5 +223,5 @@ fn get_random_position(used_positions: &[u32], grid_width: u32, grid_height: u32
 }
 
 fn is_in_killzone(grid_width: u32, x: u32, generation_time: f32) -> bool {
-    generation_time < 0.5 && x > (grid_width as f32 * 0.6) as u32
+    generation_time < 0.5 && x > (grid_width as f32 * 0.75) as u32
 }
