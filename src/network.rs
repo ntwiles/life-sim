@@ -3,7 +3,6 @@ use std::collections::HashSet;
 use super::input_neuron::{InputNeuron, InputNeuronKind};
 use super::output_neuron::{OutputNeuron, OutputNeuronKind};
 
-// TODO: Pull this out of the evolution module so it can be used elsewhere.
 #[derive(Debug)]
 pub struct NeuralNetwork {
     pub input_layer: Vec<InputNeuron>,
@@ -35,29 +34,30 @@ impl NeuralNetwork {
     }
 
     pub fn decide(&self) -> Vec<OutputNeuronKind> {
-        let mut decisions = Vec::new();
+        let mut fired_outputs = Vec::new();
 
         for (i, input) in self.input_layer.iter().enumerate() {
-            // Don't bother updating inputs that aren't connected to anything.
-            if !self.connections.iter().any(|(input, _)| *input == i) {
+            // TODO: filter + map -> filter_map or fold
+            let connected_outputs: Vec<&OutputNeuron> = self
+                .connections
+                .iter()
+                .filter(|(input, _)| *input == i)
+                .map(|(_, output)| &self.output_layer[*output])
+                .collect();
+
+            if connected_outputs.len() == 0 {
                 continue;
             }
 
             let signal = input.update();
 
-            let connected_outputs = self
-                .connections
-                .iter()
-                .filter(|(input, _)| *input == i)
-                .map(|(_, output)| &self.output_layer[*output]);
-
             for output in connected_outputs {
                 if output.update(signal) {
-                    decisions.push(output.kind());
+                    fired_outputs.push(output.kind());
                 }
             }
         }
 
-        decisions
+        fired_outputs
     }
 }
