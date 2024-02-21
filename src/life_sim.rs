@@ -130,7 +130,7 @@ impl Automata for LifeSim {
                         get_random_position(&used_positions, self.grid_width, self.grid_height);
 
                     let brain = NeuralNetwork::new(
-                        entity.brain.connections.clone(),
+                        entity.brain().connections.clone(),
                         self.neuron_fire_threshold,
                     );
 
@@ -160,7 +160,7 @@ impl Automata for LifeSim {
             let index = grid_coords_to_index(entity.x(), entity.y(), self.grid_width);
 
             let output_sum = entity
-                .brain
+                .brain()
                 .connections
                 .iter()
                 .fold(0, |acc, ((_, v), _)| acc + v);

@@ -5,7 +5,7 @@ use super::output_neuron::OutputNeuronKind;
 pub struct Entity {
     x: u32,
     y: u32,
-    pub brain: NeuralNetwork,
+    brain: NeuralNetwork,
     is_alive: bool,
 }
 
@@ -89,5 +89,9 @@ impl Entity {
 
     pub fn y(&self) -> u32 {
         self.y
+    }
+
+    pub fn brain(&self) -> &NeuralNetwork {
+        &self.brain
     }
 }
