@@ -35,7 +35,7 @@ pub enum InputNeuronKind {
 // TODO: This is really janky, find a more idiomatic solution.
 impl InputNeuronKind {
     pub fn count() -> usize {
-        1
+        2
     }
 }
 

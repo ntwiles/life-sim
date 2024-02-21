@@ -103,6 +103,10 @@ impl Automata for LifeSim {
         let generation_time = self.sim_current_step as f32 / self.sim_generation_steps as f32;
 
         for entity in &mut self.entities {
+            if !entity.is_alive() {
+                continue;
+            }
+
             if is_in_killzone(self.grid_width, entity.x, generation_time) {
                 entity.kill();
             } else {
