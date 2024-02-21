@@ -30,6 +30,7 @@ pub struct LifeSim {
     render_color_gradient: Gradient,
     render_viewport_width: u32,
     render_viewport_height: u32,
+    render_killzone_color: [u8; 4],
 
     sim_current_step: usize,
     sim_generation_steps: usize,
@@ -90,6 +91,7 @@ impl LifeSim {
             render_color_gradient,
             sim_current_step: 0,
             sim_generation_steps: settings.sim_generation_steps(),
+            render_killzone_color: settings.render_killzone_color(),
             render_viewport_width: settings.render_pixel_scale() * settings.grid_width(),
             render_viewport_height: settings.render_pixel_scale() * settings.grid_height(),
         }
@@ -101,13 +103,17 @@ impl Automata for LifeSim {
         let generation_time = self.sim_current_step as f32 / self.sim_generation_steps as f32;
 
         for entity in &mut self.entities {
-            entity.update(self.grid_width, self.grid_height, generation_time);
+            if is_in_killzone(self.grid_width, entity.x, generation_time) {
+                entity.kill();
+            } else {
+                entity.update(self.grid_width, self.grid_height, generation_time);
+            }
         }
 
         if self.sim_current_step > self.sim_generation_steps {
             let selected = self.entities.iter().filter(|e| {
-                // Select if entity is in right 10% of grid.
-                e.x > self.grid_width - self.grid_width / 10
+                // Select if entity is in right 30% of grid and is alive.
+                e.is_alive() && e.x > self.grid_width - (self.grid_width as f32 * 0.3) as u32
             });
 
             let mut next_generation = Vec::new();
@@ -128,7 +134,6 @@ impl Automata for LifeSim {
                     println!("{}", dot);
 
                     let child = Entity::new(x, y, brain);
-
                     next_generation.push(child);
                 }
             }
@@ -144,6 +149,10 @@ impl Automata for LifeSim {
         let mut entity_colors: HashMap<usize, [u8; 4]> = HashMap::new();
 
         for entity in &self.entities {
+            if !entity.is_alive() {
+                continue;
+            }
+
             let index = grid_coords_to_index(entity.x, entity.y, self.grid_width);
 
             let output_sum = entity
@@ -160,6 +169,8 @@ impl Automata for LifeSim {
             entity_colors.insert(index, color);
         }
 
+        let generation_time = self.sim_current_step as f32 / self.sim_generation_steps as f32;
+
         for (i, pixel) in pixels.chunks_exact_mut(4).enumerate() {
             let (vx, vy) = viewport_index_to_coords(
                 i,
@@ -171,6 +182,8 @@ impl Automata for LifeSim {
 
             let color: [u8; 4] = if entity_colors.contains_key(&index) {
                 entity_colors[&index]
+            } else if is_in_killzone(self.grid_width, x, generation_time) {
+                self.render_killzone_color
             } else {
                 [0x0, 0x0, 0x0, 0xff]
             };
@@ -197,13 +210,14 @@ fn get_random_position(used_positions: &[u32], grid_width: u32, grid_height: u32
         let x = rand::random::<u32>() % grid_width;
         let y = rand::random::<u32>() % grid_height;
 
-        // let index = grid_coords_to_index(x, y, grid_width);
-
-        // TMP
-        let index = 0;
+        let index = grid_coords_to_index(x, y, grid_width);
 
         if !used_positions.contains(&(index as u32)) {
             return (x, y);
         }
     }
+}
+
+fn is_in_killzone(grid_width: u32, x: u32, generation_time: f32) -> bool {
+    generation_time < 0.5 && x > (grid_width as f32 * 0.6) as u32
 }

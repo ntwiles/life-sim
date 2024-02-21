@@ -14,6 +14,7 @@ pub struct Settings {
     neuron_connection_count: usize,
     neuron_fire_threshold: f32,
     neuron_signal_range: f32,
+    render_killzone_color: [u8; 4],
     render_pixel_scale: u32,
     entity_start_count: u32,
     sim_generation_steps: usize,
@@ -57,6 +58,10 @@ impl Settings {
 
     pub fn neuron_signal_range(&self) -> f32 {
         self.neuron_signal_range
+    }
+
+    pub fn render_killzone_color(&self) -> [u8; 4] {
+        self.render_killzone_color
     }
 
     pub fn render_pixel_scale(&self) -> u32 {

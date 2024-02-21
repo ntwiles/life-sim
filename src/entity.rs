@@ -1,15 +1,22 @@
 use super::network::NeuralNetwork;
 use super::output_neuron::OutputNeuronKind;
 
+// TODO: Make these private.
 pub struct Entity {
     pub x: u32,
     pub y: u32,
     pub brain: NeuralNetwork,
+    is_alive: bool,
 }
 
 impl Entity {
     pub fn new(x: u32, y: u32, brain: NeuralNetwork) -> Self {
-        Self { x, y, brain }
+        Self {
+            x,
+            y,
+            brain,
+            is_alive: true,
+        }
     }
 
     pub fn update(&mut self, grid_width: u32, grid_height: u32, generation_time: f32) {
@@ -66,5 +73,13 @@ impl Entity {
                 }
             }
         }
+    }
+
+    pub fn kill(&mut self) {
+        self.is_alive = false;
+    }
+
+    pub fn is_alive(&self) -> bool {
+        self.is_alive
     }
 }
