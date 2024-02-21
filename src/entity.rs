@@ -12,9 +12,9 @@ impl Entity {
         Self { x, y, brain }
     }
 
-    pub fn update(&mut self, grid_width: u32, grid_height: u32) {
+    pub fn update(&mut self, grid_width: u32, grid_height: u32, generation_time: f32) {
         // TODO: Disallow multiple entities from occupying the same cell.
-        for decision in self.brain.decide() {
+        for decision in self.brain.decide(generation_time) {
             match decision {
                 OutputNeuronKind::Stay => {}
                 OutputNeuronKind::MoveLeft => {

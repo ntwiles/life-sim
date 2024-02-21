@@ -10,22 +10,26 @@ impl InputNeuron {
         Self { kind, signal_range }
     }
 
-    pub fn update(&self) -> f32 {
+    pub fn update(&self, generation_time: f32) -> f32 {
         match self.kind {
-            InputNeuronKind::Random => {
-                rand::random::<f32>() * (self.signal_range * 2.0) - self.signal_range
-            }
+            InputNeuronKind::Random => self.unit_to_range(rand::random::<f32>()),
+            InputNeuronKind::Time => self.unit_to_range(generation_time),
         }
     }
 
     pub fn kind(&self) -> InputNeuronKind {
         self.kind
     }
+
+    fn unit_to_range(&self, unit: f32) -> f32 {
+        unit * (self.signal_range * 2.0) - self.signal_range
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
 pub enum InputNeuronKind {
     Random,
+    Time,
 }
 
 // TODO: This is really janky, find a more idiomatic solution.
@@ -39,6 +43,7 @@ impl fmt::Display for InputNeuronKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             InputNeuronKind::Random => write!(f, "Random"),
+            InputNeuronKind::Time => write!(f, "Time"),
         }
     }
 }

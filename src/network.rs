@@ -17,10 +17,10 @@ impl NeuralNetwork {
         neuron_fire_threshold: f32,
     ) -> Self {
         Self {
-            input_layer: vec![InputNeuron::new(
-                InputNeuronKind::Random,
-                neuron_signal_range,
-            )],
+            input_layer: vec![
+                InputNeuron::new(InputNeuronKind::Random, neuron_signal_range),
+                InputNeuron::new(InputNeuronKind::Time, neuron_signal_range),
+            ],
             output_layer: vec![
                 OutputNeuron::new(OutputNeuronKind::MoveRandom, neuron_fire_threshold),
                 OutputNeuron::new(OutputNeuronKind::MoveUp, neuron_fire_threshold),
@@ -33,8 +33,8 @@ impl NeuralNetwork {
         }
     }
 
-    pub fn decide(&self) -> Vec<OutputNeuronKind> {
-        let mut fired_outputs = Vec::new();
+    pub fn decide(&self, generation_time: f32) -> Vec<OutputNeuronKind> {
+        let mut decisions = Vec::new();
 
         for (i, input) in self.input_layer.iter().enumerate() {
             // TODO: filter + map -> filter_map or fold
@@ -49,15 +49,15 @@ impl NeuralNetwork {
                 continue;
             }
 
-            let signal = input.update();
+            let signal = input.update(generation_time);
 
             for output in connected_outputs {
                 if output.update(signal) {
-                    fired_outputs.push(output.kind());
+                    decisions.push(output.kind());
                 }
             }
         }
 
-        fired_outputs
+        decisions
     }
 }

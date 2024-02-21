@@ -98,8 +98,10 @@ impl LifeSim {
 
 impl Automata for LifeSim {
     fn update(&mut self) {
+        let generation_time = self.sim_current_step as f32 / self.sim_generation_steps as f32;
+
         for entity in &mut self.entities {
-            entity.update(self.grid_width, self.grid_height);
+            entity.update(self.grid_width, self.grid_height, generation_time);
         }
 
         if self.sim_current_step > self.sim_generation_steps {
