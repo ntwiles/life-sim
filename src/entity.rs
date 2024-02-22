@@ -1,7 +1,6 @@
 use super::network::NeuralNetwork;
 use super::output_neuron::OutputNeuronKind;
 
-// TODO: Make these private.
 pub struct Entity {
     x: u32,
     y: u32,
