@@ -24,7 +24,7 @@ impl Settings {
     pub fn new() -> Result<Self, ConfigError> {
         let s = Config::builder()
             .add_source(config::File::with_name("default"))
-            // TODO: Find out out to make this optional.
+            // TODO: Find out how to make this optional.
             // .add_source(config::File::with_name("settings"))
             .build()?;
 
