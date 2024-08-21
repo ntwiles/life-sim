@@ -150,28 +150,12 @@ impl Automata for LifeSim {
     }
 
     fn render(&self, pixels: &mut [u8]) {
-        let mut entity_colors: HashMap<usize, [u8; 4]> = HashMap::new();
-
-        for entity in &self.entities {
-            if !entity.is_alive() {
-                continue;
-            }
-
-            let index = grid_coords_to_index(entity.x(), entity.y(), self.grid_width);
-
-            let output_sum = entity
-                .brain()
-                .connections
-                .iter()
-                .fold(0, |acc, ((_, v), _)| acc + v);
-
-            let max_sum = OutputNeuronKind::count() * self.neuron_connection_count;
-
-            let color_index: f64 = output_sum as f64 / max_sum as f64;
-            let color = self.render_color_gradient.at(color_index).to_rgba8();
-
-            entity_colors.insert(index, color);
-        }
+        let entity_colors = get_entity_colors(
+            &self.entities,
+            &self.render_color_gradient,
+            self.grid_width,
+            self.neuron_connection_count,
+        );
 
         let generation_time = self.sim_current_step as f32 / self.sim_generation_steps as f32;
 
@@ -207,6 +191,38 @@ impl Automata for LifeSim {
     fn render_pixel_scale(&self) -> u32 {
         self.render_pixel_scale
     }
+}
+
+fn get_entity_colors(
+    entities: &Vec<Entity>,
+    render_color_gradient: &Gradient,
+    grid_width: u32,
+    neuron_connection_count: usize,
+) -> HashMap<usize, [u8; 4]> {
+    let mut entity_colors: HashMap<usize, [u8; 4]> = HashMap::new();
+
+    for entity in entities {
+        if !entity.is_alive() {
+            continue;
+        }
+
+        let index = grid_coords_to_index(entity.x(), entity.y(), grid_width);
+
+        let output_sum = entity
+            .brain()
+            .connections
+            .iter()
+            .fold(0, |acc, ((_, v), _)| acc + v);
+
+        let max_sum = OutputNeuronKind::count() * neuron_connection_count;
+
+        let color_index: f64 = output_sum as f64 / max_sum as f64;
+        let color = render_color_gradient.at(color_index).to_rgba8();
+
+        entity_colors.insert(index, color);
+    }
+
+    entity_colors
 }
 
 fn get_random_position(used_positions: &[u32], grid_width: u32, grid_height: u32) -> (u32, u32) {
