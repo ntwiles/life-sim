@@ -1,8 +1,8 @@
-mod dot;
 mod entity;
 mod life_sim;
 mod neural_network;
 mod settings;
+mod util;
 
 use cellular_automata::sim::run_sim;
 

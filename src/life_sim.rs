@@ -8,12 +8,12 @@ use cellular_automata::{
 
 use colorgrad::Gradient;
 
-use crate::dot::neural_net_to_dot;
 use crate::entity::Entity;
 use crate::neural_network::brain::Brain;
 use crate::neural_network::input_neuron::InputNeuronKind;
 use crate::neural_network::output_neuron::OutputNeuronKind;
 use crate::settings::Settings;
+use crate::util::dot::neural_net_to_dot;
 
 pub struct LifeSim {
     entity_child_count: usize,
