@@ -1,9 +1,7 @@
 mod dot;
 mod entity;
-mod input_neuron;
 mod life_sim;
-mod network;
-mod output_neuron;
+mod neural_network;
 mod settings;
 
 use cellular_automata::sim::run_sim;

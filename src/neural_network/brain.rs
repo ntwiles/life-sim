@@ -4,13 +4,13 @@ use super::input_neuron::{InputNeuron, InputNeuronKind};
 use super::output_neuron::{OutputNeuron, OutputNeuronKind};
 
 #[derive(Debug)]
-pub struct NeuralNetwork {
+pub struct Brain {
     pub input_layer: Vec<InputNeuron>,
     pub output_layer: Vec<OutputNeuron>,
     pub connections: HashMap<(usize, usize), f32>,
 }
 
-impl NeuralNetwork {
+impl Brain {
     pub fn new(connections: HashMap<(usize, usize), f32>, neuron_fire_threshold: f32) -> Self {
         Self {
             input_layer: vec![

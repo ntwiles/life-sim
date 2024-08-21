@@ -1,8 +1,8 @@
 use dot_writer::DotWriter;
 
-use crate::network::NeuralNetwork;
+use crate::neural_network::brain::Brain;
 
-pub fn neural_net_to_dot(brain: &NeuralNetwork) -> String {
+pub fn neural_net_to_dot(brain: &Brain) -> String {
     let mut bytes = Vec::new();
     let mut writer = DotWriter::from(&mut bytes);
 

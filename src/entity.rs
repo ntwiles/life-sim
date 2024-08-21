@@ -1,15 +1,15 @@
-use super::network::NeuralNetwork;
-use super::output_neuron::OutputNeuronKind;
+use super::neural_network::brain::Brain;
+use super::neural_network::output_neuron::OutputNeuronKind;
 
 pub struct Entity {
     x: u32,
     y: u32,
-    brain: NeuralNetwork,
+    brain: Brain,
     is_alive: bool,
 }
 
 impl Entity {
-    pub fn new(x: u32, y: u32, brain: NeuralNetwork) -> Self {
+    pub fn new(x: u32, y: u32, brain: Brain) -> Self {
         Self {
             x,
             y,
@@ -90,7 +90,7 @@ impl Entity {
         self.y
     }
 
-    pub fn brain(&self) -> &NeuralNetwork {
+    pub fn brain(&self) -> &Brain {
         &self.brain
     }
 }

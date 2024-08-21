@@ -10,9 +10,9 @@ use colorgrad::Gradient;
 
 use crate::dot::neural_net_to_dot;
 use crate::entity::Entity;
-use crate::input_neuron::InputNeuronKind;
-use crate::network::NeuralNetwork;
-use crate::output_neuron::OutputNeuronKind;
+use crate::neural_network::brain::Brain;
+use crate::neural_network::input_neuron::InputNeuronKind;
+use crate::neural_network::output_neuron::OutputNeuronKind;
 use crate::settings::Settings;
 
 pub struct LifeSim {
@@ -73,7 +73,7 @@ impl LifeSim {
                 connections.insert((input, output), weight);
             }
 
-            let brain = NeuralNetwork::new(connections, neuron_fire_threshold);
+            let brain = Brain::new(connections, neuron_fire_threshold);
             let entity = Entity::new(x, y, brain);
 
             entities.push(entity);
@@ -129,7 +129,7 @@ impl Automata for LifeSim {
                     let (x, y) =
                         get_random_position(&used_positions, self.grid_width, self.grid_height);
 
-                    let brain = NeuralNetwork::new(
+                    let brain = Brain::new(
                         entity.brain().connections.clone(),
                         self.neuron_fire_threshold,
                     );
