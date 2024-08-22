@@ -99,7 +99,7 @@ impl LifeSim {
     }
 }
 
-impl Automata for LifeSim {
+impl Automata<(f32, HashMap<usize, [u8; 4]>)> for LifeSim {
     fn update(&mut self) {
         let generation_time = self.sim_current_step as f32 / self.sim_generation_steps as f32;
 
@@ -149,7 +149,7 @@ impl Automata for LifeSim {
         }
     }
 
-    fn render(&self, pixels: &mut [u8]) {
+    fn before_render(&self) -> (f32, HashMap<usize, [u8; 4]>) {
         let entity_colors = get_entity_colors(
             &self.entities,
             &self.render_color_gradient,
@@ -159,25 +159,25 @@ impl Automata for LifeSim {
 
         let generation_time = self.sim_current_step as f32 / self.sim_generation_steps as f32;
 
-        for (i, pixel) in pixels.chunks_exact_mut(4).enumerate() {
-            let (vx, vy) = viewport_index_to_coords(
-                i,
-                self.render_viewport_width,
-                self.render_viewport_height,
-            );
-            let (x, y) = viewport_to_grid(vx, vy, self.render_pixel_scale);
-            let index = grid_coords_to_index(x, y, self.grid_width);
+        (generation_time, entity_colors)
+    }
 
-            let color: [u8; 4] = if entity_colors.contains_key(&index) {
-                entity_colors[&index]
-            } else if is_in_killzone(self.grid_width, x, generation_time) {
-                self.render_killzone_color
-            } else {
-                [0x0, 0x0, 0x0, 0xff]
-            };
+    fn render(&self, context: &(f32, HashMap<usize, [u8; 4]>), i: usize, pixel: &mut [u8]) {
+        let (generation_time, entity_colors) = context;
+        let (vx, vy) =
+            viewport_index_to_coords(i, self.render_viewport_width, self.render_viewport_height);
+        let (x, y) = viewport_to_grid(vx, vy, self.render_pixel_scale);
+        let index = grid_coords_to_index(x, y, self.grid_width);
 
-            pixel.copy_from_slice(&color);
-        }
+        let color: [u8; 4] = if entity_colors.contains_key(&index) {
+            entity_colors[&index]
+        } else if is_in_killzone(self.grid_width, x, *generation_time) {
+            self.render_killzone_color
+        } else {
+            [0x0, 0x0, 0x0, 0xff]
+        };
+
+        pixel.copy_from_slice(&color);
     }
 
     fn grid_width(&self) -> u32 {

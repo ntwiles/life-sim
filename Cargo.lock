@@ -276,7 +276,7 @@ dependencies = [
 [[package]]
 name = "cellular_automata"
 version = "0.1.0"
-source = "git+https://github.com/ntwiles/cellular-automata.git#ac5ff7425f2e25c1b909e85e37a9d942b2ecbe76"
+source = "git+https://github.com/ntwiles/cellular-automata.git#c8d5319e6713bc33e860d5c802c392aedc4d866e"
 dependencies = [
  "colorgrad",
  "dotenv",
