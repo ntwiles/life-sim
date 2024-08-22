@@ -18,8 +18,8 @@ pub fn neural_net_to_dot(brain: &Brain) -> String {
                 .filter(|((input, _), _)| *input == i);
 
             for connection in connections {
-                let output = &brain.output_layer[connection.0 .1];
-                graph.edge(input_kind.to_string(), output.kind().to_string());
+                let output_kind = &brain.output_layer[connection.0 .1];
+                graph.edge(input_kind.to_string(), output_kind.to_string());
             }
         }
     }

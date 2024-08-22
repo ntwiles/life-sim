@@ -1,25 +1,6 @@
 use std::fmt;
 
 #[derive(Clone, Copy, Debug)]
-pub struct OutputNeuron {
-    kind: OutputNeuronKind,
-    pub fire_threshold: f32,
-}
-
-impl OutputNeuron {
-    pub fn new(kind: OutputNeuronKind, fire_threshold: f32) -> Self {
-        Self {
-            kind,
-            fire_threshold,
-        }
-    }
-
-    pub fn kind(&self) -> OutputNeuronKind {
-        self.kind
-    }
-}
-
-#[derive(Clone, Copy, Debug)]
 pub enum OutputNeuronKind {
     MoveRandom,
     MoveUp,
