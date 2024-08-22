@@ -3,8 +3,7 @@ use std::fmt;
 #[derive(Clone, Copy, Debug)]
 pub struct OutputNeuron {
     kind: OutputNeuronKind,
-    fire_threshold: f32,
-    sum: f32,
+    pub fire_threshold: f32,
 }
 
 impl OutputNeuron {
@@ -12,18 +11,7 @@ impl OutputNeuron {
         Self {
             kind,
             fire_threshold,
-            sum: 0.0,
         }
-    }
-
-    pub fn update(&mut self, signal: f32) {
-        self.sum += signal;
-    }
-
-    pub fn fire(&mut self) -> bool {
-        let will_fire = self.sum.tanh() >= self.fire_threshold;
-        self.sum = 0.0;
-        will_fire
     }
 
     pub fn kind(&self) -> OutputNeuronKind {

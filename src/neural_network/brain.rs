@@ -32,6 +32,7 @@ impl Brain {
     pub fn decide(&mut self, generation_time: f32) -> Vec<OutputNeuronKind> {
         let mut decisions = Vec::new();
 
+        let mut output_signals = vec![0.0; self.output_layer.len()];
         for (i, input) in self.input_layer.iter().enumerate() {
             let raw_signal = input.update(generation_time);
 
@@ -40,13 +41,14 @@ impl Brain {
                     continue;
                 }
 
-                let output = &mut self.output_layer[*output];
-                output.update(raw_signal * weight);
+                output_signals[*output] += raw_signal * weight;
             }
         }
 
-        for output in &mut self.output_layer {
-            if output.fire() {
+        for (i, output) in &mut self.output_layer.iter().enumerate() {
+            let signal = output_signals[i];
+
+            if signal.tanh() >= output.fire_threshold {
                 decisions.push(output.kind());
             }
         }

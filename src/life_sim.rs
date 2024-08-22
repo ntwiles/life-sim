@@ -186,6 +186,8 @@ impl Automata<RenderContext> for LifeSim {
             let mut next_generation = Vec::new();
             let used_positions = Vec::new();
 
+            println!("\nGeneration completed. Survivors:");
+
             for entity in selected {
                 for _ in 0..self.entity_child_count {
                     let (x, y) =
@@ -203,6 +205,8 @@ impl Automata<RenderContext> for LifeSim {
                     next_generation.push(child);
                 }
             }
+
+            println!("\n");
 
             self.entities = next_generation;
             self.sim_current_step = 0;
