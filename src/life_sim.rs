@@ -109,7 +109,14 @@ impl LifeSim {
                 end_time: 0.5,
                 position: (30, 0),
                 width: 30,
-                height: grid_height,
+                height: 30,
+            },
+            KillZone {
+                start_time: 0.4,
+                end_time: 0.5,
+                position: (30, 120),
+                width: 30,
+                height: 30,
             },
             KillZone {
                 start_time: 0.5,
