@@ -99,7 +99,9 @@ impl LifeSim {
     }
 }
 
-impl Automata<(f32, HashMap<usize, [u8; 4]>)> for LifeSim {
+type RenderContext = (f32, HashMap<usize, [u8; 4]>);
+
+impl Automata<RenderContext> for LifeSim {
     fn update(&mut self) {
         let generation_time = self.sim_current_step as f32 / self.sim_generation_steps as f32;
 
@@ -149,7 +151,7 @@ impl Automata<(f32, HashMap<usize, [u8; 4]>)> for LifeSim {
         }
     }
 
-    fn before_render(&self) -> (f32, HashMap<usize, [u8; 4]>) {
+    fn before_render(&self) -> RenderContext {
         let entity_colors = get_entity_colors(
             &self.entities,
             &self.render_color_gradient,
@@ -162,7 +164,7 @@ impl Automata<(f32, HashMap<usize, [u8; 4]>)> for LifeSim {
         (generation_time, entity_colors)
     }
 
-    fn render(&self, context: &(f32, HashMap<usize, [u8; 4]>), i: usize, pixel: &mut [u8]) {
+    fn render(&self, context: &RenderContext, i: usize, pixel: &mut [u8]) {
         let (generation_time, entity_colors) = context;
         let (vx, vy) =
             viewport_index_to_coords(i, self.render_viewport_width, self.render_viewport_height);
