@@ -9,6 +9,7 @@ use cellular_automata::{
 use colorgrad::Gradient;
 
 use crate::entity::Entity;
+use crate::kill_zone::{is_point_in_killzone, KillZone};
 use crate::neural_network::brain::Brain;
 use crate::neural_network::input_neuron::InputNeuronKind;
 use crate::neural_network::output_neuron::OutputNeuronKind;
@@ -18,6 +19,8 @@ use crate::util::dot::neural_net_to_dot;
 pub struct LifeSim {
     entity_child_count: usize,
     entities: Vec<Entity>,
+
+    kill_zones: Vec<KillZone>,
 
     grid_width: u32,
     grid_height: u32,
@@ -79,11 +82,64 @@ impl LifeSim {
             entities.push(entity);
         }
 
+        let kill_zones = vec![
+            KillZone {
+                start_time: 0.1,
+                end_time: 0.2,
+                position: (120, 0),
+                width: 30,
+                height: grid_height,
+            },
+            KillZone {
+                start_time: 0.2,
+                end_time: 0.3,
+                position: (90, 0),
+                width: 30,
+                height: grid_height,
+            },
+            KillZone {
+                start_time: 0.3,
+                end_time: 0.4,
+                position: (60, 0),
+                width: 30,
+                height: grid_height,
+            },
+            KillZone {
+                start_time: 0.4,
+                end_time: 0.5,
+                position: (30, 0),
+                width: 30,
+                height: grid_height,
+            },
+            KillZone {
+                start_time: 0.5,
+                end_time: 0.7,
+                position: (0, 0),
+                width: 30,
+                height: 30,
+            },
+            KillZone {
+                start_time: 0.5,
+                end_time: 0.7,
+                position: (0, 120),
+                width: 30,
+                height: 30,
+            },
+            KillZone {
+                start_time: 0.7,
+                end_time: 0.9,
+                position: (0, 0),
+                width: 30,
+                height: grid_height,
+            },
+        ];
+
         let render_color_gradient = colorgrad::rainbow();
 
         Self {
             entity_child_count: settings.entity_child_count(),
             entities,
+            kill_zones,
             grid_width,
             grid_height,
             neuron_connection_count,
@@ -110,7 +166,7 @@ impl Automata<RenderContext> for LifeSim {
                 continue;
             }
 
-            if is_in_killzone(self.grid_width, entity.x(), generation_time) {
+            if is_point_in_killzone(&self.kill_zones, (entity.x(), entity.y()), generation_time) {
                 entity.kill();
             } else {
                 entity.update(self.grid_width, self.grid_height, generation_time);
@@ -173,7 +229,7 @@ impl Automata<RenderContext> for LifeSim {
 
         let color: [u8; 4] = if entity_colors.contains_key(&index) {
             entity_colors[&index]
-        } else if is_in_killzone(self.grid_width, x, *generation_time) {
+        } else if is_point_in_killzone(&self.kill_zones, (x, y), *generation_time) {
             self.render_killzone_color
         } else {
             [0x0, 0x0, 0x0, 0xff]
@@ -238,8 +294,4 @@ fn get_random_position(used_positions: &[u32], grid_width: u32, grid_height: u32
             return (x, y);
         }
     }
-}
-
-fn is_in_killzone(grid_width: u32, x: u32, generation_time: f32) -> bool {
-    generation_time < 0.5 && x > (grid_width as f32 * 0.75) as u32
 }

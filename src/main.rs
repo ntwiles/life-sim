@@ -1,4 +1,5 @@
 mod entity;
+mod kill_zone;
 mod life_sim;
 mod neural_network;
 mod settings;
