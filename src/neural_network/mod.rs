@@ -1,3 +1,3 @@
 pub mod brain;
 pub mod input_neuron_kind;
-pub mod output_neuron;
+pub mod output_neuron_kind;

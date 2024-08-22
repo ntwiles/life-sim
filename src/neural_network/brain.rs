@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use super::input_neuron_kind::InputNeuronKind;
-use super::output_neuron::OutputNeuronKind;
+use super::output_neuron_kind::OutputNeuronKind;
 
 #[derive(Debug)]
 pub struct Brain {

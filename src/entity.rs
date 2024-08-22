@@ -1,5 +1,5 @@
 use super::neural_network::brain::Brain;
-use super::neural_network::output_neuron::OutputNeuronKind;
+use super::neural_network::output_neuron_kind::OutputNeuronKind;
 
 pub struct Entity {
     x: u32,
