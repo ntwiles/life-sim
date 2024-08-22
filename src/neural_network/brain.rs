@@ -34,7 +34,10 @@ impl Brain {
 
         let mut output_signals = vec![0.0; self.output_layer.len()];
         for (i, input) in self.input_layer.iter().enumerate() {
-            let raw_signal = input.update(generation_time);
+            let raw_signal = match input.kind() {
+                InputNeuronKind::Random => rand::random::<f32>(),
+                InputNeuronKind::Time => generation_time,
+            };
 
             for ((input, output), weight) in &self.connections {
                 if *input != i {

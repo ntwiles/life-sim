@@ -9,13 +9,6 @@ impl InputNeuron {
         Self { kind }
     }
 
-    pub fn update(&self, generation_time: f32) -> f32 {
-        match self.kind {
-            InputNeuronKind::Random => rand::random::<f32>(),
-            InputNeuronKind::Time => generation_time,
-        }
-    }
-
     pub fn kind(&self) -> InputNeuronKind {
         self.kind
     }
