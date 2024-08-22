@@ -181,10 +181,7 @@ impl Automata<RenderContext> for LifeSim {
         }
 
         if self.sim_current_step > self.sim_generation_steps {
-            let selected = self.entities.iter().filter(|e| {
-                // Select if entity is in right 40% of grid and is alive.
-                e.is_alive() && e.x() > self.grid_width - (self.grid_width as f32 * 0.4) as u32
-            });
+            let selected = self.entities.iter().filter(|e| e.is_alive());
 
             let mut next_generation = Vec::new();
             let used_positions = Vec::new();
