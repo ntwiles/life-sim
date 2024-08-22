@@ -11,7 +11,6 @@ use colorgrad::Gradient;
 use crate::entity::Entity;
 use crate::kill_zone::{is_point_in_killzone, KillZone};
 use crate::neural_network::brain::Brain;
-use crate::neural_network::input_neuron_kind::InputNeuronKind;
 use crate::neural_network::output_neuron_kind::OutputNeuronKind;
 use crate::settings::Settings;
 use crate::util::dot::neural_net_to_dot;
@@ -26,7 +25,6 @@ pub struct LifeSim {
     grid_height: u32,
 
     neuron_connection_count: usize,
-    neuron_fire_threshold: f32,
 
     render_pixel_scale: u32,
     render_color_gradient: Gradient,
@@ -43,7 +41,7 @@ impl LifeSim {
         let grid_width = settings.grid_width();
         let grid_height = settings.grid_height();
         let neuron_connection_count = settings.neuron_connection_count();
-        let neuron_fire_threshold = settings.neuron_fire_threshold();
+        let neuron_output_fire_threshold = settings.neuron_fire_threshold();
         let neuron_signal_range = settings.neuron_signal_range();
 
         let mut entities = Vec::new();
@@ -52,31 +50,12 @@ impl LifeSim {
         for _ in 0..settings.entity_start_count() {
             let (x, y) = get_random_position(&used_positions, grid_width, grid_height);
 
-            let mut connections = HashMap::<(usize, usize), f32>::new();
+            let brain = Brain::new(
+                neuron_connection_count,
+                neuron_output_fire_threshold,
+                neuron_signal_range,
+            );
 
-            // Create random connections from input to output.
-            for _ in 0..neuron_connection_count {
-                let mut input;
-                let mut output;
-
-                let weight =
-                    rand::random::<f32>() * (2.0 * neuron_signal_range) - neuron_signal_range;
-
-                loop {
-                    input = rand::random::<usize>() % InputNeuronKind::count();
-                    output = rand::random::<usize>() % OutputNeuronKind::count();
-
-                    if connections.contains_key(&(input, output)) {
-                        continue;
-                    } else {
-                        break;
-                    }
-                }
-
-                connections.insert((input, output), weight);
-            }
-
-            let brain = Brain::new(connections, neuron_fire_threshold);
             let entity = Entity::new(x, y, brain);
 
             entities.push(entity);
@@ -150,7 +129,6 @@ impl LifeSim {
             grid_width,
             grid_height,
             neuron_connection_count,
-            neuron_fire_threshold,
             render_pixel_scale: settings.render_pixel_scale(),
             render_color_gradient,
             sim_current_step: 0,
@@ -193,10 +171,7 @@ impl Automata<RenderContext> for LifeSim {
                     let (x, y) =
                         get_random_position(&used_positions, self.grid_width, self.grid_height);
 
-                    let brain = Brain::new(
-                        entity.brain().connections.clone(),
-                        self.neuron_fire_threshold,
-                    );
+                    let brain = entity.brain().clone();
 
                     let dot = neural_net_to_dot(&brain);
                     println!("{}", dot);
