@@ -1,18 +1,4 @@
 use std::fmt;
-#[derive(Clone, Copy, Debug)]
-pub struct InputNeuron {
-    kind: InputNeuronKind,
-}
-
-impl InputNeuron {
-    pub fn new(kind: InputNeuronKind) -> Self {
-        Self { kind }
-    }
-
-    pub fn kind(&self) -> InputNeuronKind {
-        self.kind
-    }
-}
 
 #[derive(Clone, Copy, Debug)]
 pub enum InputNeuronKind {

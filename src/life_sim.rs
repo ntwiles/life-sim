@@ -11,7 +11,7 @@ use colorgrad::Gradient;
 use crate::entity::Entity;
 use crate::kill_zone::{is_point_in_killzone, KillZone};
 use crate::neural_network::brain::Brain;
-use crate::neural_network::input_neuron::InputNeuronKind;
+use crate::neural_network::input_neuron_kind::InputNeuronKind;
 use crate::neural_network::output_neuron::OutputNeuronKind;
 use crate::settings::Settings;
 use crate::util::dot::neural_net_to_dot;

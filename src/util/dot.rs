@@ -11,7 +11,7 @@ pub fn neural_net_to_dot(brain: &Brain) -> String {
     {
         let mut graph = writer.digraph();
 
-        for (i, input) in brain.input_layer.iter().enumerate() {
+        for (i, input_kind) in brain.input_layer.iter().enumerate() {
             let connections = brain
                 .connections
                 .iter()
@@ -19,7 +19,7 @@ pub fn neural_net_to_dot(brain: &Brain) -> String {
 
             for connection in connections {
                 let output = &brain.output_layer[connection.0 .1];
-                graph.edge(input.kind().to_string(), output.kind().to_string());
+                graph.edge(input_kind.to_string(), output.kind().to_string());
             }
         }
     }
