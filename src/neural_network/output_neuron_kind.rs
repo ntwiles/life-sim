@@ -1,6 +1,7 @@
 use std::fmt;
+use strum_macros::{EnumCount, EnumIter};
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, EnumIter, EnumCount)]
 pub enum OutputNeuronKind {
     MoveRandom,
     MoveUp,

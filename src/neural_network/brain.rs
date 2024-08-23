@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use strum::IntoEnumIterator;
+
 use super::input_neuron_kind::InputNeuronKind;
 use super::output_neuron_kind::OutputNeuronKind;
 
@@ -37,15 +39,8 @@ impl Brain {
         }
 
         Self {
-            input_layer: vec![InputNeuronKind::Random, InputNeuronKind::Time],
-            output_layer: vec![
-                OutputNeuronKind::MoveRandom,
-                OutputNeuronKind::MoveUp,
-                OutputNeuronKind::MoveDown,
-                OutputNeuronKind::MoveLeft,
-                OutputNeuronKind::MoveRight,
-                OutputNeuronKind::Stay,
-            ],
+            input_layer: InputNeuronKind::iter().collect(),
+            output_layer: OutputNeuronKind::iter().collect(),
             connections,
             output_fire_threshold,
         }
