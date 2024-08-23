@@ -5,24 +5,22 @@ use super::neural_network::output_neuron_kind::OutputNeuronKind;
 pub struct Entity {
     x: u32,
     y: u32,
-    brain: Brain,
     is_alive: bool,
 }
 
 impl Entity {
-    pub fn new(x: u32, y: u32, brain: Brain) -> Self {
+    pub fn new(x: u32, y: u32) -> Self {
         Self {
             x,
             y,
-            brain,
             is_alive: true,
         }
     }
 
-    pub fn update(&mut self, grid_size: (u32, u32), danger_dist: (u32, u32), generation_time: f32) {
+    pub fn update(&mut self, decisions: Vec<OutputNeuronKind>, grid_size: (u32, u32)) {
         // TODO: Disallow multiple entities from occupying the same cell.
 
-        for decision in self.brain.decide(generation_time, danger_dist, grid_size) {
+        for decision in decisions {
             match decision {
                 OutputNeuronKind::Stay => {}
                 OutputNeuronKind::MoveLeft => {
@@ -90,9 +88,5 @@ impl Entity {
 
     pub fn y(&self) -> u32 {
         self.y
-    }
-
-    pub fn brain(&self) -> &Brain {
-        &self.brain
     }
 }

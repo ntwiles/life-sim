@@ -5,6 +5,7 @@ use cellular_automata::{
     grid::grid_coords_to_index,
     viewport::{viewport_index_to_coords, viewport_to_grid},
 };
+use serde::de;
 
 use crate::kill_zone::{is_point_in_killzone, KillZone};
 use crate::neural_network::brain::Brain;
@@ -17,7 +18,7 @@ use strum::IntoEnumIterator;
 
 pub struct LifeSim {
     entity_child_count: usize,
-    entities: Vec<Entity>,
+    entities: Vec<(Brain, Entity)>,
 
     kill_zones: Vec<KillZone>,
 
@@ -51,9 +52,9 @@ impl LifeSim {
 
             let brain = Brain::new(neuron_connection_count, neuron_output_fire_threshold);
 
-            let entity = Entity::new(x, y, brain);
+            let entity = Entity::new(x, y);
 
-            entities.push(entity);
+            entities.push((brain, entity));
         }
 
         let kill_zones = vec![
@@ -147,42 +148,44 @@ impl Automata<RenderContext> for LifeSim {
             .filter(|kz| generation_time >= kz.start_time && generation_time <= kz.end_time)
             .collect::<Vec<&KillZone>>();
 
-        for entity in &mut self.entities {
-            if !entity.is_alive() {
+        for (brain, body) in &mut self.entities {
+            if !body.is_alive() {
                 continue;
             }
 
-            let danger_dist = distance_to_killzone(&active_kill_zones, (entity.x(), entity.y()));
+            let danger_dist = distance_to_killzone(&active_kill_zones, (body.x(), body.y()));
 
             if danger_dist == (0, 0) {
-                entity.kill();
+                body.kill();
             } else {
                 let grid_size = (self.grid_width, self.grid_height);
-                entity.update(grid_size, danger_dist, generation_time);
+
+                let decisions = brain.decide(generation_time, danger_dist, grid_size);
+                body.update(decisions, grid_size);
             }
         }
 
         if self.sim_current_step > self.sim_generation_steps {
-            let selected = self.entities.iter().filter(|e| e.is_alive());
+            let selected = self.entities.iter().filter(|(_, body)| body.is_alive());
 
             let mut next_generation = Vec::new();
             let used_positions = Vec::new();
 
             println!("\nGeneration completed. Next generation:");
 
-            for entity in selected {
+            for (brain, _) in selected {
                 for _ in 0..self.entity_child_count {
                     let (x, y) =
                         get_random_position(&used_positions, self.grid_width, self.grid_height);
 
-                    let brain = entity.brain().clone();
+                    let brain = brain.clone();
 
                     // TODO: apply both structural and weight mutation.
 
                     let dot = neural_net_to_dot(&brain);
                     println!("{}", dot);
 
-                    let child = Entity::new(x, y, brain);
+                    let child = (brain, Entity::new(x, y));
                     next_generation.push(child);
                 }
             }
@@ -249,25 +252,21 @@ impl Automata<RenderContext> for LifeSim {
 }
 
 fn get_entity_colors(
-    entities: &Vec<Entity>,
+    entities: &Vec<(Brain, Entity)>,
     render_color_gradient: &Gradient,
     grid_width: u32,
     neuron_connection_count: usize,
 ) -> HashMap<usize, [u8; 4]> {
     let mut entity_colors: HashMap<usize, [u8; 4]> = HashMap::new();
 
-    for entity in entities {
-        if !entity.is_alive() {
+    for (brain, body) in entities {
+        if !body.is_alive() {
             continue;
         }
 
-        let index = grid_coords_to_index(entity.x(), entity.y(), grid_width);
+        let index = grid_coords_to_index(body.x(), body.y(), grid_width);
 
-        let output_sum = entity
-            .brain()
-            .connections
-            .iter()
-            .fold(0, |acc, ((_, v), _)| acc + v);
+        let output_sum = brain.connections.iter().fold(0, |acc, ((_, v), _)| acc + v);
 
         let max_sum = OutputNeuronKind::iter().count() * neuron_connection_count;
 
