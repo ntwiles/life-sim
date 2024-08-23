@@ -11,12 +11,6 @@ pub enum OutputNeuronKind {
     Stay,
 }
 
-impl OutputNeuronKind {
-    pub fn count() -> usize {
-        6
-    }
-}
-
 impl fmt::Display for OutputNeuronKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {

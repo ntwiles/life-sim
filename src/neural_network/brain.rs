@@ -25,8 +25,8 @@ impl Brain {
             let weight = rand::random::<f32>() * (2.0 * signal_range) - signal_range;
 
             loop {
-                input = rand::random::<usize>() % InputNeuronKind::count();
-                output = rand::random::<usize>() % OutputNeuronKind::count();
+                input = rand::random::<usize>() % InputNeuronKind::iter().count();
+                output = rand::random::<usize>() % OutputNeuronKind::iter().count();
 
                 if connections.contains_key(&(input, output)) {
                     continue;

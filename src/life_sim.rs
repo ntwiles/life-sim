@@ -6,14 +6,14 @@ use cellular_automata::{
     viewport::{viewport_index_to_coords, viewport_to_grid},
 };
 
-use colorgrad::Gradient;
-
 use crate::entity::Entity;
 use crate::kill_zone::{is_point_in_killzone, KillZone};
 use crate::neural_network::brain::Brain;
 use crate::neural_network::output_neuron_kind::OutputNeuronKind;
 use crate::settings::Settings;
 use crate::util::dot::neural_net_to_dot;
+use colorgrad::Gradient;
+use strum::IntoEnumIterator;
 
 pub struct LifeSim {
     entity_child_count: usize,
@@ -257,7 +257,7 @@ fn get_entity_colors(
             .iter()
             .fold(0, |acc, ((_, v), _)| acc + v);
 
-        let max_sum = OutputNeuronKind::count() * neuron_connection_count;
+        let max_sum = OutputNeuronKind::iter().count() * neuron_connection_count;
 
         let color_index: f64 = output_sum as f64 / max_sum as f64;
         let color = render_color_gradient.at(color_index).to_rgba8();
