@@ -1,14 +1,12 @@
-use super::neural_network::brain::Brain;
 use super::neural_network::output_neuron_kind::OutputNeuronKind;
 
-// TODO: The entity probably shouldn't know about the brain. It should just know about the decisions it can make.
-pub struct Entity {
+pub struct Body {
     x: u32,
     y: u32,
     is_alive: bool,
 }
 
-impl Entity {
+impl Body {
     pub fn new(x: u32, y: u32) -> Self {
         Self {
             x,

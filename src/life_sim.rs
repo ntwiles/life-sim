@@ -5,20 +5,19 @@ use cellular_automata::{
     grid::grid_coords_to_index,
     viewport::{viewport_index_to_coords, viewport_to_grid},
 };
-use serde::de;
 
 use crate::kill_zone::{is_point_in_killzone, KillZone};
 use crate::neural_network::brain::Brain;
 use crate::neural_network::output_neuron_kind::OutputNeuronKind;
 use crate::settings::Settings;
 use crate::util::dot::neural_net_to_dot;
-use crate::{entity::Entity, kill_zone::distance_to_killzone};
+use crate::{body::Body, kill_zone::distance_to_killzone};
 use colorgrad::Gradient;
 use strum::IntoEnumIterator;
 
 pub struct LifeSim {
     entity_child_count: usize,
-    entities: Vec<(Brain, Entity)>,
+    entities: Vec<(Brain, Body)>,
 
     kill_zones: Vec<KillZone>,
 
@@ -51,10 +50,9 @@ impl LifeSim {
             let (x, y) = get_random_position(&used_positions, grid_width, grid_height);
 
             let brain = Brain::new(neuron_connection_count, neuron_output_fire_threshold);
+            let body = Body::new(x, y);
 
-            let entity = Entity::new(x, y);
-
-            entities.push((brain, entity));
+            entities.push((brain, body));
         }
 
         let kill_zones = vec![
@@ -185,7 +183,7 @@ impl Automata<RenderContext> for LifeSim {
                     let dot = neural_net_to_dot(&brain);
                     println!("{}", dot);
 
-                    let child = (brain, Entity::new(x, y));
+                    let child = (brain, Body::new(x, y));
                     next_generation.push(child);
                 }
             }
@@ -252,7 +250,7 @@ impl Automata<RenderContext> for LifeSim {
 }
 
 fn get_entity_colors(
-    entities: &Vec<(Brain, Entity)>,
+    entities: &Vec<(Brain, Body)>,
     render_color_gradient: &Gradient,
     grid_width: u32,
     neuron_connection_count: usize,
