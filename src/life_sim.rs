@@ -164,7 +164,7 @@ impl Automata<RenderContext> for LifeSim {
             let mut next_generation = Vec::new();
             let used_positions = Vec::new();
 
-            println!("\nGeneration completed. Survivors:");
+            println!("\nGeneration completed. Next generation:");
 
             for entity in selected {
                 for _ in 0..self.entity_child_count {
@@ -172,6 +172,8 @@ impl Automata<RenderContext> for LifeSim {
                         get_random_position(&used_positions, self.grid_width, self.grid_height);
 
                     let brain = entity.brain().clone();
+
+                    // TODO: apply both structural and weight mutation.
 
                     let dot = neural_net_to_dot(&brain);
                     println!("{}", dot);
