@@ -14,7 +14,7 @@ pub struct Brain {
 }
 
 impl Brain {
-    pub fn new(connection_count: usize, signal_range: f32, output_fire_threshold: f32) -> Self {
+    pub fn new(connection_count: usize, output_fire_threshold: f32) -> Self {
         let mut connections = HashMap::<(usize, usize), f32>::new();
 
         // Create random connections from input to output.
@@ -22,7 +22,8 @@ impl Brain {
             let mut input;
             let mut output;
 
-            let weight = rand::random::<f32>() * (2.0 * signal_range) - signal_range;
+            // Random f32 between -1.0 and 1.0.
+            let weight = (rand::random::<f32>() - 0.5) * 2.0;
 
             loop {
                 input = rand::random::<usize>() % InputNeuronKind::iter().count();
@@ -56,6 +57,7 @@ impl Brain {
             let raw_signal = match input {
                 InputNeuronKind::Random => rand::random::<f32>(),
                 InputNeuronKind::Time => generation_time,
+                InputNeuronKind::ProximityToDanger => 0.0,
             };
 
             output_signals[*output_index] += raw_signal * weight;

@@ -4,7 +4,6 @@ grid_width = 150
 grid_height = 150
 neuron_connection_count = 4
 neuron_fire_threshold = 0.5
-neuron_signal_range = 4.0
 render_killzone_color = [150, 75, 0, 255]
 render_pixel_scale = 6
 sim_generation_steps = 300

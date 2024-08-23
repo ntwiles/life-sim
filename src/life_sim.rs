@@ -42,7 +42,6 @@ impl LifeSim {
         let grid_height = settings.grid_height();
         let neuron_connection_count = settings.neuron_connection_count();
         let neuron_output_fire_threshold = settings.neuron_fire_threshold();
-        let neuron_signal_range = settings.neuron_signal_range();
 
         let mut entities = Vec::new();
         let used_positions = Vec::new();
@@ -50,11 +49,7 @@ impl LifeSim {
         for _ in 0..settings.entity_start_count() {
             let (x, y) = get_random_position(&used_positions, grid_width, grid_height);
 
-            let brain = Brain::new(
-                neuron_connection_count,
-                neuron_signal_range,
-                neuron_output_fire_threshold,
-            );
+            let brain = Brain::new(neuron_connection_count, neuron_output_fire_threshold);
 
             let entity = Entity::new(x, y, brain);
 
