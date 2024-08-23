@@ -1,6 +1,7 @@
 use super::neural_network::brain::Brain;
 use super::neural_network::output_neuron_kind::OutputNeuronKind;
 
+// TODO: The entity probably shouldn't know about the brain. It should just know about the decisions it can make.
 pub struct Entity {
     x: u32,
     y: u32,
@@ -18,9 +19,10 @@ impl Entity {
         }
     }
 
-    pub fn update(&mut self, grid_width: u32, grid_height: u32, generation_time: f32) {
+    pub fn update(&mut self, grid_size: (u32, u32), danger_dist: (u32, u32), generation_time: f32) {
         // TODO: Disallow multiple entities from occupying the same cell.
-        for decision in self.brain.decide(generation_time) {
+
+        for decision in self.brain.decide(generation_time, danger_dist, grid_size) {
             match decision {
                 OutputNeuronKind::Stay => {}
                 OutputNeuronKind::MoveLeft => {
@@ -29,7 +31,7 @@ impl Entity {
                     }
                 }
                 OutputNeuronKind::MoveRight => {
-                    if self.x < grid_width - 1 {
+                    if self.x < grid_size.0 - 1 {
                         self.x += 1;
                     }
                 }
@@ -39,7 +41,7 @@ impl Entity {
                     }
                 }
                 OutputNeuronKind::MoveDown => {
-                    if self.y < grid_height - 1 {
+                    if self.y < grid_size.1 - 1 {
                         self.y += 1;
                     }
                 }
@@ -53,7 +55,7 @@ impl Entity {
                             }
                         }
                         1 => {
-                            if self.x < grid_width - 1 {
+                            if self.x < grid_size.0 - 1 {
                                 self.x += 1;
                             }
                         }
@@ -63,7 +65,7 @@ impl Entity {
                             }
                         }
                         3 => {
-                            if self.y < grid_height - 1 {
+                            if self.y < grid_size.1 - 1 {
                                 self.y += 1;
                             }
                         }

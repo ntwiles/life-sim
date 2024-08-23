@@ -6,12 +6,12 @@ use cellular_automata::{
     viewport::{viewport_index_to_coords, viewport_to_grid},
 };
 
-use crate::entity::Entity;
 use crate::kill_zone::{is_point_in_killzone, KillZone};
 use crate::neural_network::brain::Brain;
 use crate::neural_network::output_neuron_kind::OutputNeuronKind;
 use crate::settings::Settings;
 use crate::util::dot::neural_net_to_dot;
+use crate::{entity::Entity, kill_zone::distance_to_killzone};
 use colorgrad::Gradient;
 use strum::IntoEnumIterator;
 
@@ -135,21 +135,30 @@ impl LifeSim {
     }
 }
 
-type RenderContext = (f32, HashMap<usize, [u8; 4]>);
+type RenderContext = (f32, HashMap<usize, [u8; 4]>, Vec<KillZone>);
 
 impl Automata<RenderContext> for LifeSim {
     fn update(&mut self) {
         let generation_time = self.sim_current_step as f32 / self.sim_generation_steps as f32;
+
+        let active_kill_zones = self
+            .kill_zones
+            .iter()
+            .filter(|kz| generation_time >= kz.start_time && generation_time <= kz.end_time)
+            .collect::<Vec<&KillZone>>();
 
         for entity in &mut self.entities {
             if !entity.is_alive() {
                 continue;
             }
 
-            if is_point_in_killzone(&self.kill_zones, (entity.x(), entity.y()), generation_time) {
+            let danger_dist = distance_to_killzone(&active_kill_zones, (entity.x(), entity.y()));
+
+            if danger_dist == (0, 0) {
                 entity.kill();
             } else {
-                entity.update(self.grid_width, self.grid_height, generation_time);
+                let grid_size = (self.grid_width, self.grid_height);
+                entity.update(grid_size, danger_dist, generation_time);
             }
         }
 
@@ -187,6 +196,8 @@ impl Automata<RenderContext> for LifeSim {
         }
     }
 
+    // This whole render context dependency injection thing may not be what we want. It might be better to just
+    // save state in the automata and have the render function access it directly.
     fn before_render(&self) -> RenderContext {
         let entity_colors = get_entity_colors(
             &self.entities,
@@ -196,12 +207,18 @@ impl Automata<RenderContext> for LifeSim {
         );
 
         let generation_time = self.sim_current_step as f32 / self.sim_generation_steps as f32;
+        let active_kill_zones = self
+            .kill_zones
+            .clone()
+            .into_iter()
+            .filter(|kz| generation_time >= kz.start_time && generation_time <= kz.end_time)
+            .collect::<Vec<KillZone>>();
 
-        (generation_time, entity_colors)
+        (generation_time, entity_colors, active_kill_zones)
     }
 
     fn render(&self, context: &RenderContext, i: usize, pixel: &mut [u8]) {
-        let (generation_time, entity_colors) = context;
+        let (generation_time, entity_colors, active_killzones) = context;
         let (vx, vy) =
             viewport_index_to_coords(i, self.render_viewport_width, self.render_viewport_height);
         let (x, y) = viewport_to_grid(vx, vy, self.render_pixel_scale);
@@ -209,7 +226,7 @@ impl Automata<RenderContext> for LifeSim {
 
         let color: [u8; 4] = if entity_colors.contains_key(&index) {
             entity_colors[&index]
-        } else if is_point_in_killzone(&self.kill_zones, (x, y), *generation_time) {
+        } else if is_point_in_killzone(active_killzones, (x, y), *generation_time) {
             self.render_killzone_color
         } else {
             [0x0, 0x0, 0x0, 0xff]

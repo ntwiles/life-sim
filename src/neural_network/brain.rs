@@ -22,7 +22,7 @@ impl Brain {
             let mut input;
             let mut output;
 
-            // Random f32 between -1.0 and 1.0.
+            // between -1.0 and 1.0.
             let weight = (rand::random::<f32>() - 0.5) * 2.0;
 
             loop {
@@ -47,7 +47,12 @@ impl Brain {
         }
     }
 
-    pub fn decide(&mut self, generation_time: f32) -> Vec<OutputNeuronKind> {
+    pub fn decide(
+        &mut self,
+        generation_time: f32,
+        danger_dist: (u32, u32),
+        grid_size: (u32, u32),
+    ) -> Vec<OutputNeuronKind> {
         let mut decisions = Vec::new();
 
         let mut output_signals = vec![0.0; self.output_layer.len()];
@@ -57,7 +62,8 @@ impl Brain {
             let raw_signal = match input {
                 InputNeuronKind::Random => rand::random::<f32>(),
                 InputNeuronKind::Time => generation_time,
-                InputNeuronKind::ProximityToDanger => 0.0,
+                InputNeuronKind::DangerDistX => danger_dist.0 as f32 / grid_size.0 as f32,
+                InputNeuronKind::DangerDistY => danger_dist.1 as f32 / grid_size.1 as f32,
             };
 
             output_signals[*output_index] += raw_signal * weight;

@@ -5,7 +5,8 @@ use strum_macros::{EnumCount, EnumIter};
 pub enum InputNeuronKind {
     Random,
     Time,
-    ProximityToDanger,
+    DangerDistX,
+    DangerDistY,
 }
 
 impl fmt::Display for InputNeuronKind {
@@ -13,7 +14,8 @@ impl fmt::Display for InputNeuronKind {
         match self {
             InputNeuronKind::Random => write!(f, "Random"),
             InputNeuronKind::Time => write!(f, "Time"),
-            InputNeuronKind::ProximityToDanger => write!(f, "ProximityToDanger"),
+            InputNeuronKind::DangerDistX => write!(f, "DangerDistX"),
+            InputNeuronKind::DangerDistY => write!(f, "DangerDistY"),
         }
     }
 }
