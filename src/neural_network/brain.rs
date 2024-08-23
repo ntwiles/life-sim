@@ -55,21 +55,18 @@ impl Brain {
         let mut decisions = Vec::new();
 
         let mut output_signals = vec![0.0; self.output_layer.len()];
-        for (i, input_kind) in self.input_layer.iter().enumerate() {
-            let raw_signal = match input_kind {
+        for ((input_index, output_index), weight) in &self.connections {
+            let input = self.input_layer[*input_index];
+
+            let raw_signal = match input {
                 InputNeuronKind::Random => rand::random::<f32>(),
                 InputNeuronKind::Time => generation_time,
             };
 
-            for ((input, output), weight) in &self.connections {
-                if *input != i {
-                    continue;
-                }
-
-                output_signals[*output] += raw_signal * weight;
-            }
+            output_signals[*output_index] += raw_signal * weight;
         }
 
+        // Check if each output neuron should fire.
         for (i, output_kind) in &mut self.output_layer.iter().enumerate() {
             let signal = output_signals[i];
 

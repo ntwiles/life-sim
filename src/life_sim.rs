@@ -52,8 +52,8 @@ impl LifeSim {
 
             let brain = Brain::new(
                 neuron_connection_count,
-                neuron_output_fire_threshold,
                 neuron_signal_range,
+                neuron_output_fire_threshold,
             );
 
             let entity = Entity::new(x, y, brain);
