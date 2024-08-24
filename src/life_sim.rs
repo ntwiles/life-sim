@@ -14,6 +14,7 @@ use crate::{body::Body, kill_zone::distance_to_killzone};
 use colorgrad::Gradient;
 
 pub struct LifeSim {
+    max_entity_count: u32,
     entity_child_count: usize,
     entities: Vec<(Brain, Body)>,
 
@@ -28,6 +29,9 @@ pub struct LifeSim {
     render_viewport_height: u32,
     render_killzone_color: [u8; 4],
 
+    neuron_hidden_layer_width: usize,
+    neuron_output_fire_threshold: f32,
+
     sim_current_step: usize,
     sim_generation_steps: usize,
 }
@@ -40,14 +44,18 @@ impl LifeSim {
         let neuron_output_fire_threshold = settings.neuron_fire_threshold();
         let neuron_hidden_layer_width = settings.neuron_hidden_layer_width();
 
+        let max_entity_count = settings.entity_start_count();
+
         let mut entities = Vec::new();
-        let used_positions = Vec::new();
+        let mut used_positions = Vec::<usize>::new();
 
-        for _ in 0..settings.entity_start_count() {
-            let (x, y) = get_random_position(&used_positions, grid_width, grid_height);
-
-            let brain = Brain::new(neuron_hidden_layer_width, neuron_output_fire_threshold);
-            let body = Body::new(x, y);
+        for _ in 0..max_entity_count {
+            let (brain, body) = spawn_entity(
+                Brain::new(neuron_hidden_layer_width, neuron_output_fire_threshold),
+                &mut used_positions,
+                grid_width,
+                grid_height,
+            );
 
             entities.push((brain, body));
         }
@@ -124,6 +132,9 @@ impl LifeSim {
             render_killzone_color: settings.render_killzone_color(),
             render_viewport_width: settings.render_pixel_scale() * settings.grid_width(),
             render_viewport_height: settings.render_pixel_scale() * settings.grid_height(),
+            max_entity_count,
+            neuron_hidden_layer_width,
+            neuron_output_fire_threshold,
         }
     }
 }
@@ -158,12 +169,30 @@ impl Automata<RenderContext> for LifeSim {
         }
 
         if self.sim_current_step > self.sim_generation_steps {
-            let selected = self.entities.iter().filter(|(_, body)| body.is_alive());
+            let selected: Vec<&(Brain, Body)> = self
+                .entities
+                .iter()
+                .filter(|(_, body)| body.is_alive())
+                .collect();
 
             let mut next_generation = Vec::new();
-            let used_positions = Vec::new();
+            let mut used_positions = Vec::<usize>::new();
 
-            println!("\nGeneration completed. Next generation:");
+            // For every slot not taken by a selected entity's children, randomly spawn a new child.
+
+            for _ in 0..self.max_entity_count - (selected.len() * self.entity_child_count) as u32 {
+                let (brain, body) = spawn_entity(
+                    Brain::new(
+                        self.neuron_hidden_layer_width,
+                        self.neuron_output_fire_threshold,
+                    ),
+                    &mut used_positions,
+                    self.grid_width,
+                    self.grid_height,
+                );
+
+                next_generation.push((brain, body));
+            }
 
             for (brain, _) in selected {
                 for _ in 0..self.entity_child_count {
@@ -181,8 +210,6 @@ impl Automata<RenderContext> for LifeSim {
                     next_generation.push(child);
                 }
             }
-
-            println!("\n");
 
             self.entities = next_generation;
             self.sim_current_step = 0;
@@ -267,14 +294,31 @@ fn get_entity_colors(
     entity_colors
 }
 
-fn get_random_position(used_positions: &[u32], grid_width: u32, grid_height: u32) -> (u32, u32) {
+fn spawn_entity(
+    brain: Brain,
+    occupied_positions: &mut Vec<usize>,
+    grid_width: u32,
+    grid_height: u32,
+) -> (Brain, Body) {
+    let (x, y) = get_random_position(occupied_positions, grid_width, grid_height);
+
+    let body = Body::new(x, y);
+
+    (brain, body)
+}
+
+fn get_random_position(
+    occupied_positions: &Vec<usize>,
+    grid_width: u32,
+    grid_height: u32,
+) -> (u32, u32) {
     loop {
         let x = rand::random::<u32>() % grid_width;
         let y = rand::random::<u32>() % grid_height;
 
         let index = grid_coords_to_index(x, y, grid_width);
 
-        if !used_positions.contains(&(index as u32)) {
+        if !occupied_positions.contains(&index) {
             return (x, y);
         }
     }
