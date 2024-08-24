@@ -199,8 +199,6 @@ impl Automata<RenderContext> for LifeSim {
                 self.max_entity_count,
             );
 
-            println!("Num selected children: {}", num_selected_children);
-
             for _ in 0..(self.max_entity_count - num_selected_children) {
                 let (brain, body) = spawn_entity(
                     Brain::new(
@@ -215,6 +213,10 @@ impl Automata<RenderContext> for LifeSim {
 
                 next_generation.push((brain, body));
             }
+
+            let max_selected = self.max_entity_count / self.entity_child_count as u32;
+
+            let selected = selected.iter().take(max_selected as usize);
 
             // Spawn children of selected entities.
             for (brain, body) in selected {
