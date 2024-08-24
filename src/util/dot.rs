@@ -1,10 +1,10 @@
-use dot_writer::DotWriter;
+// use dot_writer::DotWriter;
 
 use crate::neural_network::brain::Brain;
 
-pub fn neural_net_to_dot(brain: &Brain) -> String {
-    let mut bytes = Vec::new();
-    let mut writer = DotWriter::from(&mut bytes);
+pub fn neural_net_to_dot(_brain: &Brain) -> String {
+    let bytes = Vec::new();
+    // let mut writer = DotWriter::from(&mut bytes);
 
     // TODO: Get this working again.
     // writer.set_pretty_print(false);

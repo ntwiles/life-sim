@@ -8,12 +8,10 @@ use cellular_automata::{
 
 use crate::kill_zone::{is_point_in_killzone, KillZone};
 use crate::neural_network::brain::Brain;
-use crate::neural_network::output_neuron::OutputNeuron;
 use crate::settings::Settings;
 use crate::util::dot::neural_net_to_dot;
 use crate::{body::Body, kill_zone::distance_to_killzone};
 use colorgrad::Gradient;
-use strum::IntoEnumIterator;
 
 pub struct LifeSim {
     entity_child_count: usize,
@@ -255,6 +253,7 @@ fn get_entity_colors(
 
         let index = grid_coords_to_index(body.x(), body.y(), grid_width);
 
+        // TODO: Bring back a way to color related entities differently. Maybe just randomize the color at start and inherit and mutate it.
         // let output_sum = brain.connections.iter().fold(0, |acc, ((_, v, _))| acc + v);
         // let max_sum = OutputNeuron::iter().count();
         // let color_index: f64 = output_sum as f64 / max_sum as f64;
