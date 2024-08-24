@@ -1,4 +1,4 @@
-use super::neural_network::output_neuron_kind::OutputNeuronKind;
+use super::neural_network::output_neuron::OutputNeuron;
 
 pub struct Body {
     x: u32,
@@ -15,33 +15,33 @@ impl Body {
         }
     }
 
-    pub fn update(&mut self, decisions: Vec<OutputNeuronKind>, grid_size: (u32, u32)) {
+    pub fn update(&mut self, decisions: Vec<OutputNeuron>, grid_size: (u32, u32)) {
         // TODO: Disallow multiple entities from occupying the same cell.
 
         for decision in decisions {
             match decision {
-                OutputNeuronKind::Stay => {}
-                OutputNeuronKind::MoveLeft => {
+                OutputNeuron::Stay => {}
+                OutputNeuron::MoveLeft => {
                     if self.x > 0 {
                         self.x -= 1;
                     }
                 }
-                OutputNeuronKind::MoveRight => {
+                OutputNeuron::MoveRight => {
                     if self.x < grid_size.0 - 1 {
                         self.x += 1;
                     }
                 }
-                OutputNeuronKind::MoveUp => {
+                OutputNeuron::MoveUp => {
                     if self.y > 0 {
                         self.y -= 1;
                     }
                 }
-                OutputNeuronKind::MoveDown => {
+                OutputNeuron::MoveDown => {
                     if self.y < grid_size.1 - 1 {
                         self.y += 1;
                     }
                 }
-                OutputNeuronKind::MoveRandom => {
+                OutputNeuron::MoveRandom => {
                     let direction = rand::random::<u8>() % 4;
 
                     match direction {

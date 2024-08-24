@@ -11,7 +11,7 @@ pub struct Settings {
     entity_child_count: usize,
     grid_width: u32,
     grid_height: u32,
-    neuron_connection_count: usize,
+    neuron_hidden_layer_width: usize,
     neuron_fire_threshold: f32,
     render_killzone_color: [u8; 4],
     render_pixel_scale: u32,
@@ -47,8 +47,8 @@ impl Settings {
         self.grid_height
     }
 
-    pub fn neuron_connection_count(&self) -> usize {
-        self.neuron_connection_count
+    pub fn neuron_hidden_layer_width(&self) -> usize {
+        self.neuron_hidden_layer_width
     }
 
     pub fn neuron_fire_threshold(&self) -> f32 {

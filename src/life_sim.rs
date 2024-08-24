@@ -8,7 +8,7 @@ use cellular_automata::{
 
 use crate::kill_zone::{is_point_in_killzone, KillZone};
 use crate::neural_network::brain::Brain;
-use crate::neural_network::output_neuron_kind::OutputNeuronKind;
+use crate::neural_network::output_neuron::OutputNeuron;
 use crate::settings::Settings;
 use crate::util::dot::neural_net_to_dot;
 use crate::{body::Body, kill_zone::distance_to_killzone};
@@ -24,8 +24,6 @@ pub struct LifeSim {
     grid_width: u32,
     grid_height: u32,
 
-    neuron_connection_count: usize,
-
     render_pixel_scale: u32,
     render_color_gradient: Gradient,
     render_viewport_width: u32,
@@ -40,8 +38,9 @@ impl LifeSim {
     pub fn new(settings: &Settings) -> Self {
         let grid_width = settings.grid_width();
         let grid_height = settings.grid_height();
-        let neuron_connection_count = settings.neuron_connection_count();
+
         let neuron_output_fire_threshold = settings.neuron_fire_threshold();
+        let neuron_hidden_layer_width = settings.neuron_hidden_layer_width();
 
         let mut entities = Vec::new();
         let used_positions = Vec::new();
@@ -49,7 +48,7 @@ impl LifeSim {
         for _ in 0..settings.entity_start_count() {
             let (x, y) = get_random_position(&used_positions, grid_width, grid_height);
 
-            let brain = Brain::new(neuron_connection_count, neuron_output_fire_threshold);
+            let brain = Brain::new(neuron_hidden_layer_width, neuron_output_fire_threshold);
             let body = Body::new(x, y);
 
             entities.push((brain, body));
@@ -114,17 +113,14 @@ impl LifeSim {
             },
         ];
 
-        let render_color_gradient = colorgrad::rainbow();
-
         Self {
             entity_child_count: settings.entity_child_count(),
             entities,
             kill_zones,
             grid_width,
             grid_height,
-            neuron_connection_count,
             render_pixel_scale: settings.render_pixel_scale(),
-            render_color_gradient,
+            render_color_gradient: colorgrad::rainbow(),
             sim_current_step: 0,
             sim_generation_steps: settings.sim_generation_steps(),
             render_killzone_color: settings.render_killzone_color(),
@@ -200,12 +196,8 @@ impl Automata<RenderContext> for LifeSim {
     // This whole render context dependency injection thing may not be what we want. It might be better to just
     // save state in the automata and have the render function access it directly.
     fn before_render(&self) -> RenderContext {
-        let entity_colors = get_entity_colors(
-            &self.entities,
-            &self.render_color_gradient,
-            self.grid_width,
-            self.neuron_connection_count,
-        );
+        let entity_colors =
+            get_entity_colors(&self.entities, &self.render_color_gradient, self.grid_width);
 
         let generation_time = self.sim_current_step as f32 / self.sim_generation_steps as f32;
         let active_kill_zones = self
@@ -253,7 +245,6 @@ fn get_entity_colors(
     entities: &Vec<(Brain, Body)>,
     render_color_gradient: &Gradient,
     grid_width: u32,
-    neuron_connection_count: usize,
 ) -> HashMap<usize, [u8; 4]> {
     let mut entity_colors: HashMap<usize, [u8; 4]> = HashMap::new();
 
@@ -264,9 +255,9 @@ fn get_entity_colors(
 
         let index = grid_coords_to_index(body.x(), body.y(), grid_width);
 
-        let output_sum = brain.connections.iter().fold(0, |acc, ((_, v), _)| acc + v);
+        let output_sum = brain.connections.iter().fold(0, |acc, ((_, v, _))| acc + v);
 
-        let max_sum = OutputNeuronKind::iter().count() * neuron_connection_count;
+        let max_sum = OutputNeuron::iter().count();
 
         let color_index: f64 = output_sum as f64 / max_sum as f64;
         let color = render_color_gradient.at(color_index).to_rgba8();
