@@ -2,7 +2,7 @@ use rand::seq::IteratorRandom;
 
 use strum::IntoEnumIterator;
 
-use super::hidden_neuron::{self, HiddenNeuron};
+use super::hidden_neuron::HiddenNeuron;
 use super::input_neuron::InputNeuron;
 use super::output_neuron::OutputNeuron;
 
@@ -15,11 +15,11 @@ enum NeuronKind {
 
 #[derive(Debug)]
 pub struct Brain {
-    pub connections: Vec<(usize, usize, f32)>,
-    pub output_fire_threshold: f32,
-    pub neurons: Vec<NeuronKind>,
-    pub input_layer: Vec<usize>,
-    pub output_layer: Vec<usize>,
+    connections: Vec<(usize, usize, f32)>,
+    output_fire_threshold: f32,
+    neurons: Vec<NeuronKind>,
+    input_layer: Vec<usize>,
+    output_layer: Vec<usize>,
 }
 
 impl Brain {

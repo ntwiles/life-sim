@@ -248,18 +248,18 @@ fn get_entity_colors(
 ) -> HashMap<usize, [u8; 4]> {
     let mut entity_colors: HashMap<usize, [u8; 4]> = HashMap::new();
 
-    for (brain, body) in entities {
+    for (_brain, body) in entities {
         if !body.is_alive() {
             continue;
         }
 
         let index = grid_coords_to_index(body.x(), body.y(), grid_width);
 
-        let output_sum = brain.connections.iter().fold(0, |acc, ((_, v, _))| acc + v);
+        // let output_sum = brain.connections.iter().fold(0, |acc, ((_, v, _))| acc + v);
+        // let max_sum = OutputNeuron::iter().count();
+        // let color_index: f64 = output_sum as f64 / max_sum as f64;
 
-        let max_sum = OutputNeuron::iter().count();
-
-        let color_index: f64 = output_sum as f64 / max_sum as f64;
+        let color_index = 0.6;
         let color = render_color_gradient.at(color_index).to_rgba8();
 
         entity_colors.insert(index, color);
