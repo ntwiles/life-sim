@@ -4,14 +4,16 @@ pub struct Body {
     x: u32,
     y: u32,
     is_alive: bool,
+    color: [u8; 4],
 }
 
 impl Body {
-    pub fn new(x: u32, y: u32) -> Self {
+    pub fn new(x: u32, y: u32, color: [u8; 4]) -> Self {
         Self {
             x,
             y,
             is_alive: true,
+            color,
         }
     }
 
@@ -86,5 +88,9 @@ impl Body {
 
     pub fn y(&self) -> u32 {
         self.y
+    }
+
+    pub fn color(&self) -> [u8; 4] {
+        self.color
     }
 }

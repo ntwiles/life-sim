@@ -9,7 +9,6 @@ use cellular_automata::{
 use crate::kill_zone::{is_point_in_killzone, KillZone};
 use crate::neural_network::brain::Brain;
 use crate::settings::Settings;
-use crate::util::dot::neural_net_to_dot;
 use crate::{body::Body, kill_zone::distance_to_killzone};
 use colorgrad::Gradient;
 
@@ -34,6 +33,7 @@ pub struct LifeSim {
 
     sim_current_step: usize,
     sim_generation_steps: usize,
+    sim_generation_number: u32,
 }
 
 impl LifeSim {
@@ -46,6 +46,8 @@ impl LifeSim {
 
         let max_entity_count = settings.entity_start_count();
 
+        let render_color_gradient = colorgrad::rainbow();
+
         let mut entities = Vec::new();
         let mut used_positions = Vec::<usize>::new();
 
@@ -55,6 +57,7 @@ impl LifeSim {
                 &mut used_positions,
                 grid_width,
                 grid_height,
+                &render_color_gradient,
             );
 
             entities.push((brain, body));
@@ -98,20 +101,20 @@ impl LifeSim {
             },
             KillZone {
                 start_time: 0.5,
-                end_time: 0.7,
+                end_time: 0.6,
                 position: (0, 0),
                 width: 30,
                 height: 30,
             },
             KillZone {
                 start_time: 0.5,
-                end_time: 0.7,
+                end_time: 0.6,
                 position: (0, 120),
                 width: 30,
                 height: 30,
             },
             KillZone {
-                start_time: 0.7,
+                start_time: 0.6,
                 end_time: 1.0,
                 position: (0, 0),
                 width: 30,
@@ -126,12 +129,13 @@ impl LifeSim {
             grid_width,
             grid_height,
             render_pixel_scale: settings.render_pixel_scale(),
-            render_color_gradient: colorgrad::rainbow(),
-            sim_current_step: 0,
-            sim_generation_steps: settings.sim_generation_steps(),
+            render_color_gradient,
             render_killzone_color: settings.render_killzone_color(),
             render_viewport_width: settings.render_pixel_scale() * settings.grid_width(),
             render_viewport_height: settings.render_pixel_scale() * settings.grid_height(),
+            sim_current_step: 0,
+            sim_generation_number: 0,
+            sim_generation_steps: settings.sim_generation_steps(),
             max_entity_count,
             neuron_hidden_layer_width,
             neuron_output_fire_threshold,
@@ -175,12 +179,29 @@ impl Automata<RenderContext> for LifeSim {
                 .filter(|(_, body)| body.is_alive())
                 .collect();
 
+            println!(
+                "Generation {} over. Survivors {}/{} ({}%)",
+                self.sim_generation_number,
+                selected.len(),
+                self.entities.len(),
+                selected.len() as f32 / self.entities.len() as f32 * 100.0
+            );
+
             let mut next_generation = Vec::new();
             let mut used_positions = Vec::<usize>::new();
 
             // For every slot not taken by a selected entity's children, randomly spawn a new child.
+            // This is done to give the population a helping hand, but should eventually be removed in
+            // favor of mutation and a better training system.
 
-            for _ in 0..self.max_entity_count - (selected.len() * self.entity_child_count) as u32 {
+            let num_selected_children: u32 = std::cmp::min(
+                selected.len() as u32 * self.entity_child_count as u32,
+                self.max_entity_count,
+            );
+
+            println!("Num selected children: {}", num_selected_children);
+
+            for _ in 0..(self.max_entity_count - num_selected_children) {
                 let (brain, body) = spawn_entity(
                     Brain::new(
                         self.neuron_hidden_layer_width,
@@ -189,12 +210,14 @@ impl Automata<RenderContext> for LifeSim {
                     &mut used_positions,
                     self.grid_width,
                     self.grid_height,
+                    &self.render_color_gradient,
                 );
 
                 next_generation.push((brain, body));
             }
 
-            for (brain, _) in selected {
+            // Spawn children of selected entities.
+            for (brain, body) in selected {
                 for _ in 0..self.entity_child_count {
                     let (x, y) =
                         get_random_position(&used_positions, self.grid_width, self.grid_height);
@@ -203,15 +226,16 @@ impl Automata<RenderContext> for LifeSim {
 
                     // TODO: apply both structural and weight mutation.
 
-                    let dot = neural_net_to_dot(&brain);
-                    println!("{}", dot);
+                    // let dot = neural_net_to_dot(&brain);
+                    // println!("{}", dot);
 
-                    let child = (brain, Body::new(x, y));
+                    let child = (brain, Body::new(x, y, body.color()));
                     next_generation.push(child);
                 }
             }
 
             self.entities = next_generation;
+            self.sim_generation_number += 1;
             self.sim_current_step = 0;
         } else {
             self.sim_current_step += 1;
@@ -221,8 +245,7 @@ impl Automata<RenderContext> for LifeSim {
     // This whole render context dependency injection thing may not be what we want. It might be better to just
     // save state in the automata and have the render function access it directly.
     fn before_render(&self) -> RenderContext {
-        let entity_colors =
-            get_entity_colors(&self.entities, &self.render_color_gradient, self.grid_width);
+        let entity_colors = get_entity_colors(&self.entities, self.grid_width);
 
         let generation_time = self.sim_current_step as f32 / self.sim_generation_steps as f32;
         let active_kill_zones = self
@@ -266,11 +289,7 @@ impl Automata<RenderContext> for LifeSim {
     }
 }
 
-fn get_entity_colors(
-    entities: &Vec<(Brain, Body)>,
-    render_color_gradient: &Gradient,
-    grid_width: u32,
-) -> HashMap<usize, [u8; 4]> {
+fn get_entity_colors(entities: &Vec<(Brain, Body)>, grid_width: u32) -> HashMap<usize, [u8; 4]> {
     let mut entity_colors: HashMap<usize, [u8; 4]> = HashMap::new();
 
     for (_brain, body) in entities {
@@ -278,17 +297,10 @@ fn get_entity_colors(
             continue;
         }
 
-        let index = grid_coords_to_index(body.x(), body.y(), grid_width);
-
-        // TODO: Bring back a way to color related entities differently. Maybe just randomize the color at start and inherit and mutate it.
-        // let output_sum = brain.connections.iter().fold(0, |acc, ((_, v, _))| acc + v);
-        // let max_sum = OutputNeuron::iter().count();
-        // let color_index: f64 = output_sum as f64 / max_sum as f64;
-
-        let color_index = 0.6;
-        let color = render_color_gradient.at(color_index).to_rgba8();
-
-        entity_colors.insert(index, color);
+        entity_colors.insert(
+            grid_coords_to_index(body.x(), body.y(), grid_width),
+            body.color(),
+        );
     }
 
     entity_colors
@@ -299,10 +311,14 @@ fn spawn_entity(
     occupied_positions: &mut Vec<usize>,
     grid_width: u32,
     grid_height: u32,
+    gradient: &Gradient,
 ) -> (Brain, Body) {
     let (x, y) = get_random_position(occupied_positions, grid_width, grid_height);
 
-    let body = Body::new(x, y);
+    let color_index = rand::random::<f64>();
+    let color = gradient.at(color_index).to_rgba8();
+
+    let body = Body::new(x, y, color);
 
     (brain, body)
 }
