@@ -8,14 +8,20 @@ impl Evolution {}
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
+    entity_start_count: u32,
     entity_child_count: usize,
+    entity_mutation_rate: f32,
+    entity_mutation_magnitude: f32,
+
     grid_width: u32,
     grid_height: u32,
+
     neuron_hidden_layer_width: usize,
     neuron_fire_threshold: f32,
+
     render_killzone_color: [u8; 4],
     render_pixel_scale: u32,
-    entity_start_count: u32,
+
     sim_generation_steps: usize,
 }
 
@@ -37,6 +43,14 @@ impl Settings {
 
     pub fn entity_start_count(&self) -> u32 {
         self.entity_start_count
+    }
+
+    pub fn entity_mutation_rate(&self) -> f32 {
+        self.entity_mutation_rate
+    }
+
+    pub fn entity_mutation_magnitude(&self) -> f32 {
+        self.entity_mutation_magnitude
     }
 
     pub fn grid_width(&self) -> u32 {

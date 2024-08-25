@@ -4,16 +4,16 @@ pub struct Body {
     x: u32,
     y: u32,
     is_alive: bool,
-    color: [u8; 4],
+    color_gradient_index: f64,
 }
 
 impl Body {
-    pub fn new(x: u32, y: u32, color: [u8; 4]) -> Self {
+    pub fn new(x: u32, y: u32, color_gradient_index: f64) -> Self {
         Self {
             x,
             y,
             is_alive: true,
-            color,
+            color_gradient_index,
         }
     }
 
@@ -74,6 +74,10 @@ impl Body {
         }
     }
 
+    pub fn mutate_color(&mut self, mutation_amount: f64) {
+        self.color_gradient_index += mutation_amount;
+    }
+
     pub fn kill(&mut self) {
         self.is_alive = false;
     }
@@ -90,7 +94,18 @@ impl Body {
         self.y
     }
 
-    pub fn color(&self) -> [u8; 4] {
-        self.color
+    pub fn color_gradient_index(&self) -> f64 {
+        self.color_gradient_index
+    }
+}
+
+impl Clone for Body {
+    fn clone(&self) -> Self {
+        Self {
+            x: self.x,
+            y: self.y,
+            is_alive: self.is_alive,
+            color_gradient_index: self.color_gradient_index,
+        }
     }
 }

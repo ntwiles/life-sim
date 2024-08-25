@@ -1,9 +1,15 @@
 entity_child_count = 4
 entity_start_count = 1000
+entity_mutation_rate = 0.25
+entity_mutation_magnitude = 0.2
+
 grid_width = 150
 grid_height = 150
+
 neuron_hidden_layer_width = 10
 neuron_fire_threshold = 0.5
+
 render_killzone_color = [150, 75, 0, 255]
 render_pixel_scale = 6
-sim_generation_steps = 300
+
+sim_generation_steps = 250
