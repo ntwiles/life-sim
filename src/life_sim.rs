@@ -6,10 +6,13 @@ use cellular_automata::{
     viewport::{viewport_index_to_coords, viewport_to_grid},
 };
 
-use crate::kill_zone::{is_point_in_killzone, KillZone};
-use crate::neural_network::brain::Brain;
 use crate::settings::Settings;
 use crate::{body::Body, kill_zone::distance_to_killzone};
+use crate::{
+    kill_zone::{is_point_in_killzone, KillZone},
+    util::dot::clear_dot_files,
+};
+use crate::{neural_network::brain::Brain, util::dot::write_dot_file};
 use colorgrad::Gradient;
 
 pub struct LifeSim {
@@ -54,13 +57,17 @@ impl LifeSim {
         let mut entities = Vec::new();
         let mut used_positions = Vec::<usize>::new();
 
-        for _ in 0..entity_start_count {
+        clear_dot_files();
+
+        for i in 0..entity_start_count {
             let (brain, body) = spawn_entity(
                 Brain::new(neuron_hidden_layer_width, neuron_output_fire_threshold),
                 &mut used_positions,
                 grid_width,
                 grid_height,
             );
+
+            write_dot_file(&brain, i);
 
             entities.push((brain, body));
         }
@@ -230,6 +237,8 @@ impl Automata<RenderContext> for LifeSim {
 
             let selected = selected.iter().take(max_selected as usize);
 
+            clear_dot_files();
+
             // Spawn children of selected entities.
             for (brain, body) in selected {
                 for i in 0..self.entity_child_count {
@@ -239,7 +248,8 @@ impl Automata<RenderContext> for LifeSim {
                     let mut brain = brain.clone();
                     let mut body = Body::new(x, y, body.color_gradient_index());
 
-                    if i as f32 / self.entity_child_count as f32 <= self.entity_mutation_rate {
+                    if (i + 1) as f32 / self.entity_child_count as f32 <= self.entity_mutation_rate
+                    {
                         let mutation_amount = (rand::random::<f64>() - 0.5)
                             * 2.0
                             * self.entity_mutation_magnitue as f64;
@@ -248,8 +258,7 @@ impl Automata<RenderContext> for LifeSim {
                         body.mutate_color(mutation_amount);
                     }
 
-                    // let dot = neural_net_to_dot(&brain);
-                    // println!("{}", dot);
+                    write_dot_file(&brain, i as u32);
 
                     let child = (brain, body);
                     next_generation.push(child);

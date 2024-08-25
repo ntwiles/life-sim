@@ -4,20 +4,14 @@ use strum::IntoEnumIterator;
 
 use super::hidden_neuron::HiddenNeuron;
 use super::input_neuron::InputNeuron;
+use super::neuron_kind::NeuronKind;
 use super::output_neuron::OutputNeuron;
-
-#[derive(Debug, Clone)]
-enum NeuronKind {
-    Input(InputNeuron),
-    Hidden(HiddenNeuron),
-    Output(OutputNeuron),
-}
 
 #[derive(Debug)]
 pub struct Brain {
-    connections: Vec<(usize, usize, f32)>,
+    pub connections: Vec<(usize, usize, f32)>,
     output_fire_threshold: f32,
-    neurons: Vec<NeuronKind>,
+    pub neurons: Vec<NeuronKind>,
     input_layer: Vec<usize>,
     output_layer: Vec<usize>,
 }
