@@ -67,62 +67,64 @@ impl LifeSim {
 
         let kill_zones = vec![
             KillZone {
-                start_time: 0.1,
-                end_time: 0.25,
+                start_time: 30,
+                end_time: 60,
                 position: (120, 0),
                 width: 30,
                 height: grid_height,
             },
             KillZone {
-                start_time: 0.25,
-                end_time: 0.4,
+                start_time: 60,
+                end_time: 90,
                 position: (90, 0),
                 width: 30,
                 height: grid_height,
             },
             KillZone {
-                start_time: 0.4,
-                end_time: 0.55,
+                start_time: 90,
+                end_time: 120,
                 position: (60, 0),
                 width: 30,
                 height: grid_height,
             },
             KillZone {
-                start_time: 0.55,
-                end_time: 0.7,
+                start_time: 120,
+                end_time: 150,
                 position: (30, 0),
                 width: 30,
                 height: 30,
             },
             KillZone {
-                start_time: 0.55,
-                end_time: 0.7,
+                start_time: 120,
+                end_time: 150,
                 position: (30, 120),
                 width: 30,
                 height: 30,
             },
             KillZone {
-                start_time: 0.7,
-                end_time: 0.85,
+                start_time: 150,
+                end_time: 180,
                 position: (0, 0),
                 width: 30,
                 height: 30,
             },
             KillZone {
-                start_time: 0.7,
-                end_time: 0.85,
+                start_time: 150,
+                end_time: 180,
                 position: (0, 120),
                 width: 30,
                 height: 30,
             },
             KillZone {
-                start_time: 0.85,
-                end_time: 1.0,
+                start_time: 180,
+                end_time: 210,
                 position: (0, 0),
                 width: 30,
                 height: grid_height,
             },
         ];
+
+        let sim_generation_steps = kill_zones.iter().map(|kz| kz.end_time).max().unwrap();
 
         Self {
             entity_child_count: settings.entity_child_count(),
@@ -144,7 +146,7 @@ impl LifeSim {
 
             sim_current_step: 0,
             sim_generation_number: 0,
-            sim_generation_steps: settings.sim_generation_steps(),
+            sim_generation_steps,
 
             neuron_hidden_layer_width,
             neuron_output_fire_threshold,
@@ -152,7 +154,7 @@ impl LifeSim {
     }
 }
 
-type RenderContext = (f32, HashMap<(u32, u32), f64>, Vec<KillZone>);
+type RenderContext = (HashMap<(u32, u32), f64>, Vec<KillZone>);
 
 impl Automata<RenderContext> for LifeSim {
     fn update(&mut self) {
@@ -161,7 +163,9 @@ impl Automata<RenderContext> for LifeSim {
         let active_kill_zones = self
             .kill_zones
             .iter()
-            .filter(|kz| generation_time >= kz.start_time && generation_time <= kz.end_time)
+            .filter(|kz| {
+                self.sim_current_step >= kz.start_time && self.sim_current_step <= kz.end_time
+            })
             .collect::<Vec<&KillZone>>();
 
         for (brain, body) in &mut self.entities {
@@ -263,13 +267,13 @@ impl Automata<RenderContext> for LifeSim {
     // This whole render context dependency injection thing may not be what we want. It might be better to just
     // save state in the automata and have the render function access it directly.
     fn before_render(&self) -> RenderContext {
-        let generation_time = self.sim_current_step as f32 / self.sim_generation_steps as f32;
-
         let active_kill_zones = self
             .kill_zones
             .clone()
             .into_iter()
-            .filter(|kz| generation_time >= kz.start_time && generation_time <= kz.end_time)
+            .filter(|kz| {
+                self.sim_current_step >= kz.start_time && self.sim_current_step <= kz.end_time
+            })
             .collect::<Vec<KillZone>>();
 
         let entity_colors: HashMap<(u32, u32), f64> = self
@@ -279,11 +283,11 @@ impl Automata<RenderContext> for LifeSim {
             .map(|(_, body)| ((body.x(), body.y()), body.color_gradient_index()))
             .collect();
 
-        (generation_time, entity_colors, active_kill_zones)
+        (entity_colors, active_kill_zones)
     }
 
     fn render(&self, context: &RenderContext, i: usize, pixel: &mut [u8]) {
-        let (generation_time, entity_colors, active_killzones) = context;
+        let (entity_colors, active_killzones) = context;
         let (vx, vy) =
             viewport_index_to_coords(i, self.render_viewport_width, self.render_viewport_height);
         let (x, y) = viewport_to_grid(vx, vy, self.render_pixel_scale);
@@ -292,7 +296,7 @@ impl Automata<RenderContext> for LifeSim {
             self.render_color_gradient
                 .at(entity_colors[&(x, y)])
                 .to_rgba8()
-        } else if is_point_in_killzone(active_killzones, (x, y), *generation_time) {
+        } else if is_point_in_killzone(active_killzones, (x, y), self.sim_current_step) {
             self.render_killzone_color
         } else {
             [0x0, 0x0, 0x0, 0xff]

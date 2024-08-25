@@ -11,5 +11,3 @@ neuron_fire_threshold = 0.5
 
 render_killzone_color = [150, 75, 0, 255]
 render_pixel_scale = 6
-
-sim_generation_steps = 250

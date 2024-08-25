@@ -21,8 +21,6 @@ pub struct Settings {
 
     render_killzone_color: [u8; 4],
     render_pixel_scale: u32,
-
-    sim_generation_steps: usize,
 }
 
 impl Settings {
@@ -75,9 +73,5 @@ impl Settings {
 
     pub fn render_pixel_scale(&self) -> u32 {
         self.render_pixel_scale
-    }
-
-    pub fn sim_generation_steps(&self) -> usize {
-        self.sim_generation_steps
     }
 }
