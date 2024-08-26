@@ -7,7 +7,6 @@ grid_width = 150
 grid_height = 150
 
 neuron_hidden_layer_width = 10
-neuron_fire_threshold = 0.5
 
 render_killzone_color = [150, 75, 0, 255]
 render_pixel_scale = 6

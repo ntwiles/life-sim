@@ -17,58 +17,54 @@ impl Body {
         }
     }
 
-    pub fn update(&mut self, decisions: Vec<OutputNeuron>, grid_size: (u32, u32)) {
-        // TODO: Disallow multiple entities from occupying the same cell.
+    pub fn update(&mut self, decision: OutputNeuron, grid_size: (u32, u32)) {
+        match decision {
+            OutputNeuron::Stay => {}
+            OutputNeuron::MoveLeft => {
+                if self.x > 0 {
+                    self.x -= 1;
+                }
+            }
+            OutputNeuron::MoveRight => {
+                if self.x < grid_size.0 - 1 {
+                    self.x += 1;
+                }
+            }
+            OutputNeuron::MoveUp => {
+                if self.y > 0 {
+                    self.y -= 1;
+                }
+            }
+            OutputNeuron::MoveDown => {
+                if self.y < grid_size.1 - 1 {
+                    self.y += 1;
+                }
+            }
+            OutputNeuron::MoveRandom => {
+                let direction = rand::random::<u8>() % 4;
 
-        for decision in decisions {
-            match decision {
-                OutputNeuron::Stay => {}
-                OutputNeuron::MoveLeft => {
-                    if self.x > 0 {
-                        self.x -= 1;
-                    }
-                }
-                OutputNeuron::MoveRight => {
-                    if self.x < grid_size.0 - 1 {
-                        self.x += 1;
-                    }
-                }
-                OutputNeuron::MoveUp => {
-                    if self.y > 0 {
-                        self.y -= 1;
-                    }
-                }
-                OutputNeuron::MoveDown => {
-                    if self.y < grid_size.1 - 1 {
-                        self.y += 1;
-                    }
-                }
-                OutputNeuron::MoveRandom => {
-                    let direction = rand::random::<u8>() % 4;
-
-                    match direction {
-                        0 => {
-                            if self.x > 0 {
-                                self.x -= 1;
-                            }
+                match direction {
+                    0 => {
+                        if self.x > 0 {
+                            self.x -= 1;
                         }
-                        1 => {
-                            if self.x < grid_size.0 - 1 {
-                                self.x += 1;
-                            }
-                        }
-                        2 => {
-                            if self.y > 0 {
-                                self.y -= 1;
-                            }
-                        }
-                        3 => {
-                            if self.y < grid_size.1 - 1 {
-                                self.y += 1;
-                            }
-                        }
-                        _ => unreachable!(),
                     }
+                    1 => {
+                        if self.x < grid_size.0 - 1 {
+                            self.x += 1;
+                        }
+                    }
+                    2 => {
+                        if self.y > 0 {
+                            self.y -= 1;
+                        }
+                    }
+                    3 => {
+                        if self.y < grid_size.1 - 1 {
+                            self.y += 1;
+                        }
+                    }
+                    _ => unreachable!(),
                 }
             }
         }

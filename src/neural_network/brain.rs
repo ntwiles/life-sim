@@ -10,14 +10,13 @@ use super::output_neuron::OutputNeuron;
 #[derive(Debug)]
 pub struct Brain {
     pub connections: Vec<(usize, usize, f32)>,
-    output_fire_threshold: f32,
     pub neurons: Vec<NeuronKind>,
     input_layer: Vec<usize>,
     output_layer: Vec<usize>,
 }
 
 impl Brain {
-    pub fn new(hidden_neuron_width: usize, output_fire_threshold: f32) -> Self {
+    pub fn new(hidden_neuron_width: usize) -> Self {
         let mut connections = Vec::<(usize, usize, f32)>::new();
         let mut neurons = Vec::new();
 
@@ -71,7 +70,6 @@ impl Brain {
 
         Self {
             connections,
-            output_fire_threshold,
             input_layer,
             output_layer,
             neurons,
@@ -93,7 +91,7 @@ impl Brain {
         generation_time: f32,
         danger_dist: (u32, u32),
         grid_size: (u32, u32),
-    ) -> Vec<OutputNeuron> {
+    ) -> OutputNeuron {
         let mut signals = vec![0.0; self.neurons.len()];
 
         // Initialize input signals.
@@ -133,7 +131,7 @@ impl Brain {
             signals[*b_index] += signal * weight;
         }
 
-        let mut decisions = Vec::new();
+        let mut decision = (f32::NEG_INFINITY, OutputNeuron::MoveRandom);
 
         // Check if each output neuron should fire.
         for output_index in &self.output_layer {
@@ -142,14 +140,14 @@ impl Brain {
                 _ => panic!("Output layer should only contain output neurons."),
             };
 
-            let signal = signals[*output_index];
+            let signal = signals[*output_index].tanh();
 
-            if signal.tanh() >= self.output_fire_threshold {
-                decisions.push(output.clone());
+            if signal >= decision.0 {
+                decision = (signal, output);
             }
         }
 
-        decisions
+        decision.1
     }
 }
 
@@ -159,7 +157,6 @@ impl Clone for Brain {
             input_layer: self.input_layer.clone(),
             output_layer: self.output_layer.clone(),
             connections: self.connections.clone(),
-            output_fire_threshold: self.output_fire_threshold,
             neurons: self.neurons.clone(),
         }
     }

@@ -35,7 +35,6 @@ pub struct LifeSim {
     render_killzone_color: [u8; 4],
 
     neuron_hidden_layer_width: usize,
-    neuron_output_fire_threshold: f32,
 
     sim_current_step: usize,
     sim_generation_steps: usize,
@@ -47,7 +46,6 @@ impl LifeSim {
         let grid_width = settings.grid_width();
         let grid_height = settings.grid_height();
 
-        let neuron_output_fire_threshold = settings.neuron_fire_threshold();
         let neuron_hidden_layer_width = settings.neuron_hidden_layer_width();
 
         let entity_start_count = settings.entity_start_count();
@@ -61,7 +59,7 @@ impl LifeSim {
 
         for i in 0..entity_start_count {
             let (brain, body) = spawn_entity(
-                Brain::new(neuron_hidden_layer_width, neuron_output_fire_threshold),
+                Brain::new(neuron_hidden_layer_width),
                 &mut used_positions,
                 grid_width,
                 grid_height,
@@ -156,7 +154,6 @@ impl LifeSim {
             sim_generation_steps,
 
             neuron_hidden_layer_width,
-            neuron_output_fire_threshold,
         }
     }
 }
@@ -187,8 +184,8 @@ impl Automata<RenderContext> for LifeSim {
             } else {
                 let grid_size = (self.grid_width, self.grid_height);
 
-                let decisions = brain.decide(generation_time, danger_dist, grid_size);
-                body.update(decisions, grid_size);
+                let decision = brain.decide(generation_time, danger_dist, grid_size);
+                body.update(decision, grid_size);
             }
         }
 
@@ -200,7 +197,7 @@ impl Automata<RenderContext> for LifeSim {
                 .collect();
 
             println!(
-                "Generation {} over. Survivors {}/{} ({}%)",
+                "Generation {} over. Survivors {}/{} ({:.2}%)",
                 self.sim_generation_number,
                 selected.len(),
                 self.entities.len(),
@@ -221,10 +218,7 @@ impl Automata<RenderContext> for LifeSim {
 
             for _ in 0..(self.entity_start_count - num_selected_children) {
                 let (brain, body) = spawn_entity(
-                    Brain::new(
-                        self.neuron_hidden_layer_width,
-                        self.neuron_output_fire_threshold,
-                    ),
+                    Brain::new(self.neuron_hidden_layer_width),
                     &mut used_positions,
                     self.grid_width,
                     self.grid_height,

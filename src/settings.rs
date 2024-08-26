@@ -17,7 +17,6 @@ pub struct Settings {
     grid_height: u32,
 
     neuron_hidden_layer_width: usize,
-    neuron_fire_threshold: f32,
 
     render_killzone_color: [u8; 4],
     render_pixel_scale: u32,
@@ -61,10 +60,6 @@ impl Settings {
 
     pub fn neuron_hidden_layer_width(&self) -> usize {
         self.neuron_hidden_layer_width
-    }
-
-    pub fn neuron_fire_threshold(&self) -> f32 {
-        self.neuron_fire_threshold
     }
 
     pub fn render_killzone_color(&self) -> [u8; 4] {
