@@ -31,7 +31,7 @@ impl Brain {
 
         let mut hidden_layer = Vec::new();
 
-        // create random connections from input to hidden.
+        // Create random connections from input to hidden.
         for _ in 0..hidden_neuron_width {
             let input_index = input_layer[rand::random::<usize>() % input_layer.len()];
 
@@ -70,9 +70,6 @@ impl Brain {
         }
 
         Self {
-            // input_layer: InputNeuron::iter().collect(),
-            // hidden_layer: HiddenNeuron::iter().collect(),
-            // output_layer: OutputNeuron::iter().collect(),
             connections,
             output_fire_threshold,
             input_layer,
@@ -124,7 +121,7 @@ impl Brain {
                 NeuronKind::Hidden(hidden) => {
                     let hidden = match hidden {
                         HiddenNeuron::Identity => signal,
-                        HiddenNeuron::Inverse => 1.0 - signal,
+                        HiddenNeuron::Gaussian => (-signal.powi(2) / 2.0).exp(),
                     };
 
                     signals[*b_index] += hidden * weight;
