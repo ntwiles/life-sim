@@ -84,7 +84,7 @@ impl Brain {
             .choose_mut(&mut rand::thread_rng())
             .unwrap();
 
-        connection.2 += (rand::random::<f32>() - 0.5) * mutation_amount;
+        connection.2 += mutation_amount;
         connection.2 = connection.2.max(-1.0).min(1.0);
     }
 
