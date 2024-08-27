@@ -7,6 +7,7 @@ mod life_sim;
 mod neural_network;
 mod neural_network_config;
 mod render_config;
+mod rendering;
 mod settings;
 mod simulation_config;
 mod util;
@@ -27,27 +28,28 @@ fn main() -> Result<(), Error> {
     let settings = Settings::new().unwrap();
 
     let render_config = RenderConfig {
-        pixel_scale: settings.render_pixel_scale(),
-        killzone_color: settings.render_killzone_color(),
-        viewport_width: settings.render_pixel_scale() * settings.grid_width(),
-        viewport_height: settings.render_pixel_scale() * settings.grid_height(),
+        pixel_scale: settings.render_pixel_scale,
+        killzone_color: settings.render_killzone_color,
+        background_color: settings.render_background_color,
+        viewport_width: settings.render_pixel_scale * settings.grid_width,
+        viewport_height: settings.render_pixel_scale * settings.grid_height,
         color_gradient: colorgrad::rainbow(),
     };
 
     let entity_config = EntityConfig {
-        child_count: settings.entity_child_count(),
-        start_count: settings.entity_start_count(),
+        child_count: settings.entity_child_count,
+        start_count: settings.entity_start_count,
     };
 
     let grid_config = GridConfig {
-        width: settings.grid_width(),
-        height: settings.grid_height(),
+        width: settings.grid_width,
+        height: settings.grid_height,
     };
 
     let network_config = NeuralNetworkConfig {
-        hidden_layer_width: settings.neuron_hidden_layer_width(),
-        mutation_rate: settings.entity_mutation_rate(),
-        mutation_magnitude: settings.entity_mutation_magnitude(),
+        hidden_layer_width: settings.neural_network_hidden_layer_width,
+        mutation_rate: settings.neural_network_mutation_rate,
+        mutation_magnitude: settings.neural_network_mutation_magnitude,
     };
 
     let kill_zones = vec![

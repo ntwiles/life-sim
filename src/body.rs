@@ -3,10 +3,10 @@ use crate::grid_config::GridConfig;
 use super::neural_network::output_neuron::OutputNeuron;
 
 pub struct Body {
-    x: u32,
-    y: u32,
-    is_alive: bool,
-    color_gradient_index: f64,
+    pub x: u32,
+    pub y: u32,
+    pub is_alive: bool,
+    pub color_gradient_index: f64,
 }
 
 impl Body {
@@ -74,26 +74,6 @@ impl Body {
 
     pub fn mutate_color(&mut self, mutation_amount: f64) {
         self.color_gradient_index += mutation_amount;
-    }
-
-    pub fn kill(&mut self) {
-        self.is_alive = false;
-    }
-
-    pub fn is_alive(&self) -> bool {
-        self.is_alive
-    }
-
-    pub fn x(&self) -> u32 {
-        self.x
-    }
-
-    pub fn y(&self) -> u32 {
-        self.y
-    }
-
-    pub fn color_gradient_index(&self) -> f64 {
-        self.color_gradient_index
     }
 }
 

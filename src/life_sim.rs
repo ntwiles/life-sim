@@ -10,6 +10,7 @@ use crate::{
     entities::{spawn_entities, spawn_next_generation},
     kill_zone::distance_to_killzone,
     neural_network_config::NeuralNetworkConfig,
+    rendering::additive_blend,
 };
 use crate::{entity_config::EntityConfig, neural_network::brain::Brain};
 use crate::{grid_config::GridConfig, simulation_config::SimulationConfig};
@@ -62,7 +63,7 @@ impl LifeSim {
         let selected: Vec<&(Brain, Body)> = self
             .entities
             .iter()
-            .filter(|(_, body)| body.is_alive())
+            .filter(|(_, body)| body.is_alive)
             .collect();
 
         println!(
@@ -79,8 +80,6 @@ impl LifeSim {
             &self.network_config,
             selected,
         );
-
-        println!("Next generation size: {}", next_generation.len());
 
         self.entities = next_generation;
         self.sim_generation_number += 1;
@@ -110,18 +109,18 @@ impl Automata<EntityColors> for LifeSim {
                 });
 
         for (brain, body) in &mut self.entities {
-            if !body.is_alive() {
+            if !body.is_alive {
                 continue;
             }
 
             let danger_dist = distance_to_killzone(
                 &self.sim_config.kill_zones,
                 &self.active_kill_zones,
-                (body.x(), body.y()),
+                (body.x, body.y),
             );
 
             if danger_dist == (0, 0) {
-                body.kill();
+                body.is_alive = false;
             } else {
                 let decision = brain.decide(generation_time, danger_dist, &self.grid_config);
                 body.update(decision, &self.grid_config);
@@ -140,8 +139,8 @@ impl Automata<EntityColors> for LifeSim {
     fn before_render(&self) -> EntityColors {
         self.entities
             .iter()
-            .filter(|(_, body)| body.is_alive())
-            .map(|(_, body)| ((body.x(), body.y()), body.color_gradient_index()))
+            .filter(|(_, body)| body.is_alive)
+            .map(|(_, body)| ((body.x, body.y), body.color_gradient_index))
             .collect()
     }
 
@@ -159,15 +158,19 @@ impl Automata<EntityColors> for LifeSim {
                 .color_gradient
                 .at(entity_colors[&(x, y)])
                 .to_rgba8()
-        } else if is_point_in_kill_zone(
+        } else {
+            self.render_config.background_color
+        };
+
+        let color = if is_point_in_kill_zone(
             &self.sim_config.kill_zones,
             &self.active_kill_zones,
             (x, y),
             self.sim_current_step,
         ) {
-            self.render_config.killzone_color
+            additive_blend(self.render_config.killzone_color, color)
         } else {
-            [0x0, 0x0, 0x0, 0xff]
+            color
         };
 
         pixel.copy_from_slice(&color);

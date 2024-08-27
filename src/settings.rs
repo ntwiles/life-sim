@@ -8,18 +8,19 @@ impl Evolution {}
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
-    entity_start_count: u32,
-    entity_child_count: u32,
-    entity_mutation_rate: f32,
-    entity_mutation_magnitude: f32,
+    pub entity_start_count: u32,
+    pub entity_child_count: u32,
 
-    grid_width: u32,
-    grid_height: u32,
+    pub grid_width: u32,
+    pub grid_height: u32,
 
-    neuron_hidden_layer_width: usize,
+    pub neural_network_hidden_layer_width: usize,
+    pub neural_network_mutation_rate: f32,
+    pub neural_network_mutation_magnitude: f32,
 
-    render_killzone_color: [u8; 4],
-    render_pixel_scale: u32,
+    pub render_killzone_color: [u8; 4],
+    pub render_background_color: [u8; 4],
+    pub render_pixel_scale: u32,
 }
 
 impl Settings {
@@ -30,43 +31,6 @@ impl Settings {
             // .add_source(config::File::with_name("settings"))
             .build()?;
 
-        // You can deserialize (and thus freeze) the entire configuration as
         s.try_deserialize()
-    }
-
-    pub fn entity_child_count(&self) -> u32 {
-        self.entity_child_count
-    }
-
-    pub fn entity_start_count(&self) -> u32 {
-        self.entity_start_count
-    }
-
-    pub fn entity_mutation_rate(&self) -> f32 {
-        self.entity_mutation_rate
-    }
-
-    pub fn entity_mutation_magnitude(&self) -> f32 {
-        self.entity_mutation_magnitude
-    }
-
-    pub fn grid_width(&self) -> u32 {
-        self.grid_width
-    }
-
-    pub fn grid_height(&self) -> u32 {
-        self.grid_height
-    }
-
-    pub fn neuron_hidden_layer_width(&self) -> usize {
-        self.neuron_hidden_layer_width
-    }
-
-    pub fn render_killzone_color(&self) -> [u8; 4] {
-        self.render_killzone_color
-    }
-
-    pub fn render_pixel_scale(&self) -> u32 {
-        self.render_pixel_scale
     }
 }
