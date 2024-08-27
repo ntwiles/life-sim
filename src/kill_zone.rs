@@ -7,10 +7,15 @@ pub struct KillZone {
     pub height: u32,
 }
 
-pub fn distance_to_killzone(active_kill_zones: &Vec<&KillZone>, (x, y): (u32, u32)) -> (u32, u32) {
+pub fn distance_to_killzone(
+    kill_zones: &Vec<KillZone>,
+    active_kill_zones: &Vec<usize>,
+    (x, y): (u32, u32),
+) -> (u32, u32) {
     active_kill_zones
         .iter()
-        .map(|kill_zone| {
+        .map(|i| {
+            let kill_zone = &kill_zones[*i];
             let (kx, ky) = kill_zone.position;
             let (kz_width, kz_height) = (kill_zone.width, kill_zone.height);
 
@@ -37,12 +42,14 @@ pub fn distance_to_killzone(active_kill_zones: &Vec<&KillZone>, (x, y): (u32, u3
         })
 }
 
-pub fn is_point_in_killzone(
+pub fn is_point_in_kill_zone(
     kill_zones: &Vec<KillZone>,
+    active_kill_zones: &Vec<usize>,
     (x, y): (u32, u32),
     generation_time: usize,
 ) -> bool {
-    kill_zones.iter().any(|kz| {
+    active_kill_zones.iter().any(|i| {
+        let kz = &kill_zones[*i];
         generation_time >= kz.start_time
             && generation_time <= kz.end_time
             && x >= kz.position.0
