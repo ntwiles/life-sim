@@ -128,7 +128,7 @@ impl Automata<EntityColors> for LifeSim {
             }
         }
 
-        if self.sim_current_step > self.sim_config.generation_step_count {
+        if self.sim_current_step >= self.sim_config.generation_step_count {
             self.start_new_generation();
         } else {
             self.sim_current_step += 1;
