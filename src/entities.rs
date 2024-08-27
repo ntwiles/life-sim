@@ -2,6 +2,7 @@ use cellular_automata::grid::grid_coords_to_index;
 
 use crate::{
     body::Body, entity_config::EntityConfig, grid_config::GridConfig, neural_network::brain::Brain,
+    neural_network_config::NeuralNetworkConfig,
 };
 
 fn spawn_entity(
@@ -40,7 +41,7 @@ pub fn spawn_entities(
 pub fn spawn_next_generation(
     grid_config: &GridConfig,
     entity_config: &EntityConfig,
-    neuron_layer_width: usize,
+    network_config: &NeuralNetworkConfig,
 
     selected: Vec<&(Brain, Body)>,
 ) -> Vec<(Brain, Body)> {
@@ -61,10 +62,10 @@ pub fn spawn_next_generation(
 
     // Apply mutations.
     let num_to_mutate =
-        (next_generation.len() as f32 * entity_config.mutation_rate).floor() as usize;
+        (next_generation.len() as f32 * network_config.mutation_rate).floor() as usize;
     for (brain, body) in next_generation.iter_mut().take(num_to_mutate) {
         let mutation_amount =
-            (rand::random::<f64>() - 0.5) * 2.0 * entity_config.mutation_magnitude as f64;
+            (rand::random::<f64>() - 0.5) * 2.0 * network_config.mutation_magnitude as f64;
 
         // TODO: Apply structural mutations.
         brain.mutate_connection(mutation_amount as f32);
@@ -76,7 +77,7 @@ pub fn spawn_next_generation(
     let (next_generation, _) = spawn_entities(
         grid_config,
         num_remaining,
-        neuron_layer_width,
+        network_config.hidden_layer_width,
         Some((next_generation, used_positions)),
     );
 

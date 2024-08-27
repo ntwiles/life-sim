@@ -5,7 +5,6 @@ use cellular_automata::{
     viewport::{viewport_index_to_coords, viewport_to_grid},
 };
 
-use crate::grid_config::GridConfig;
 use crate::{
     body::Body,
     entities::{spawn_entities, spawn_next_generation},
@@ -13,6 +12,7 @@ use crate::{
     neural_network_config::NeuralNetworkConfig,
 };
 use crate::{entity_config::EntityConfig, neural_network::brain::Brain};
+use crate::{grid_config::GridConfig, simulation_config::SimulationConfig};
 use crate::{
     kill_zone::{is_point_in_killzone, KillZone},
     render_config::RenderConfig,
@@ -20,17 +20,14 @@ use crate::{
 
 pub struct LifeSim {
     entities: Vec<(Brain, Body)>,
-
-    kill_zones: Vec<KillZone>,
-
     sim_current_step: usize,
-    sim_generation_steps: usize,
     sim_generation_number: u32,
 
     grid_config: GridConfig,
     render_config: RenderConfig,
     entity_config: EntityConfig,
     network_config: NeuralNetworkConfig,
+    sim_config: SimulationConfig,
 }
 
 impl LifeSim {
@@ -39,6 +36,7 @@ impl LifeSim {
         render_config: RenderConfig,
         entity_config: EntityConfig,
         network_config: NeuralNetworkConfig,
+        sim_config: SimulationConfig,
     ) -> Self {
         let (entities, _) = spawn_entities(
             &grid_config,
@@ -47,79 +45,16 @@ impl LifeSim {
             None,
         );
 
-        let kill_zones = vec![
-            KillZone {
-                start_time: 30,
-                end_time: 60,
-                position: (120, 0),
-                width: 30,
-                height: grid_config.height,
-            },
-            KillZone {
-                start_time: 60,
-                end_time: 90,
-                position: (90, 0),
-                width: 30,
-                height: grid_config.height,
-            },
-            KillZone {
-                start_time: 90,
-                end_time: 120,
-                position: (60, 0),
-                width: 30,
-                height: grid_config.height,
-            },
-            KillZone {
-                start_time: 120,
-                end_time: 150,
-                position: (30, 0),
-                width: 30,
-                height: 30,
-            },
-            KillZone {
-                start_time: 120,
-                end_time: 150,
-                position: (30, 120),
-                width: 30,
-                height: 30,
-            },
-            KillZone {
-                start_time: 150,
-                end_time: 180,
-                position: (0, 0),
-                width: 30,
-                height: 30,
-            },
-            KillZone {
-                start_time: 150,
-                end_time: 180,
-                position: (0, 120),
-                width: 30,
-                height: 30,
-            },
-            KillZone {
-                start_time: 180,
-                end_time: 210,
-                position: (0, 0),
-                width: 30,
-                height: grid_config.height,
-            },
-        ];
-
-        let sim_generation_steps = kill_zones.iter().map(|kz| kz.end_time).max().unwrap();
-
         Self {
             entity_config,
             grid_config,
             render_config,
             network_config,
+            sim_config,
 
             entities,
-
-            kill_zones,
             sim_current_step: 0,
             sim_generation_number: 0,
-            sim_generation_steps,
         }
     }
 }
@@ -128,9 +63,11 @@ type RenderContext = (HashMap<(u32, u32), f64>, Vec<KillZone>);
 
 impl Automata<RenderContext> for LifeSim {
     fn update(&mut self) {
-        let generation_time = self.sim_current_step as f32 / self.sim_generation_steps as f32;
+        let generation_time =
+            self.sim_current_step as f32 / self.sim_config.generation_step_count as f32;
 
         let active_kill_zones = self
+            .sim_config
             .kill_zones
             .iter()
             .filter(|kz| {
@@ -153,7 +90,7 @@ impl Automata<RenderContext> for LifeSim {
             }
         }
 
-        if self.sim_current_step > self.sim_generation_steps {
+        if self.sim_current_step > self.sim_config.generation_step_count {
             let selected: Vec<&(Brain, Body)> = self
                 .entities
                 .iter()
@@ -171,7 +108,7 @@ impl Automata<RenderContext> for LifeSim {
             let next_generation = spawn_next_generation(
                 &self.grid_config,
                 &self.entity_config,
-                self.network_config.hidden_layer_width,
+                &self.network_config,
                 selected,
             );
 
@@ -189,6 +126,7 @@ impl Automata<RenderContext> for LifeSim {
     // save state in the automata and have the render function access it directly.
     fn before_render(&self) -> RenderContext {
         let active_kill_zones = self
+            .sim_config
             .kill_zones
             .clone()
             .into_iter()
