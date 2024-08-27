@@ -2,17 +2,17 @@ use std::collections::HashMap;
 
 use cellular_automata::{
     automata::Automata,
-    grid::grid_coords_to_index,
     viewport::{viewport_index_to_coords, viewport_to_grid},
 };
 
+use crate::kill_zone::{is_point_in_killzone, KillZone};
+use crate::neural_network::brain::Brain;
 use crate::settings::Settings;
-use crate::{body::Body, kill_zone::distance_to_killzone};
 use crate::{
-    kill_zone::{is_point_in_killzone, KillZone},
-    util::dot::clear_dot_files,
+    body::Body,
+    entities::{spawn_entities, spawn_next_generation},
+    kill_zone::distance_to_killzone,
 };
-use crate::{neural_network::brain::Brain, util::dot::write_dot_file};
 use colorgrad::Gradient;
 
 pub struct LifeSim {
@@ -52,23 +52,13 @@ impl LifeSim {
 
         let render_color_gradient = colorgrad::rainbow();
 
-        let mut entities = Vec::new();
-        let mut used_positions = Vec::<usize>::new();
-
-        clear_dot_files();
-
-        for i in 0..entity_start_count {
-            let (brain, body) = spawn_entity(
-                Brain::new(neuron_hidden_layer_width),
-                &mut used_positions,
-                grid_width,
-                grid_height,
-            );
-
-            write_dot_file(&brain, i);
-
-            entities.push((brain, body));
-        }
+        let (entities, _) = spawn_entities(
+            grid_width,
+            grid_height,
+            entity_start_count,
+            neuron_hidden_layer_width,
+            None,
+        );
 
         let kill_zones = vec![
             KillZone {
@@ -204,60 +194,18 @@ impl Automata<RenderContext> for LifeSim {
                 selected.len() as f32 / self.entities.len() as f32 * 100.0
             );
 
-            let mut next_generation = Vec::new();
-            let mut used_positions = Vec::<usize>::new();
-
-            // For every slot not taken by a selected entity's children, randomly spawn a new child.
-            // This is done to give the population a helping hand, but should eventually be removed in
-            // favor of mutation and a better training system.
-
-            let num_selected_children: u32 = std::cmp::min(
-                selected.len() as u32 * self.entity_child_count as u32,
+            let next_generation = spawn_next_generation(
+                self.grid_width,
+                self.grid_height,
                 self.entity_start_count,
+                self.neuron_hidden_layer_width,
+                self.entity_child_count as u32,
+                self.entity_mutation_rate,
+                self.entity_mutation_magnitue,
+                selected,
             );
 
-            for _ in 0..(self.entity_start_count - num_selected_children) {
-                let (brain, body) = spawn_entity(
-                    Brain::new(self.neuron_hidden_layer_width),
-                    &mut used_positions,
-                    self.grid_width,
-                    self.grid_height,
-                );
-
-                next_generation.push((brain, body));
-            }
-
-            let max_selected = self.entity_start_count / self.entity_child_count as u32;
-
-            let selected = selected.iter().take(max_selected as usize);
-
-            clear_dot_files();
-
-            // Spawn children of selected entities.
-            for (brain, body) in selected {
-                for i in 0..self.entity_child_count {
-                    let (x, y) =
-                        get_random_position(&used_positions, self.grid_width, self.grid_height);
-
-                    let mut brain = brain.clone();
-                    let mut body = Body::new(x, y, body.color_gradient_index());
-
-                    if (i + 1) as f32 / self.entity_child_count as f32 <= self.entity_mutation_rate
-                    {
-                        let mutation_amount = (rand::random::<f64>() - 0.5)
-                            * 2.0
-                            * self.entity_mutation_magnitue as f64;
-
-                        brain.mutate_connection(mutation_amount as f32);
-                        body.mutate_color(mutation_amount);
-                    }
-
-                    write_dot_file(&brain, i as u32);
-
-                    let child = (brain, body);
-                    next_generation.push(child);
-                }
-            }
+            println!("Next generation size: {}", next_generation.len());
 
             self.entities = next_generation;
             self.sim_generation_number += 1;
@@ -318,35 +266,5 @@ impl Automata<RenderContext> for LifeSim {
 
     fn render_pixel_scale(&self) -> u32 {
         self.render_pixel_scale
-    }
-}
-
-fn spawn_entity(
-    brain: Brain,
-    occupied_positions: &mut Vec<usize>,
-    grid_width: u32,
-    grid_height: u32,
-) -> (Brain, Body) {
-    let (x, y) = get_random_position(occupied_positions, grid_width, grid_height);
-
-    let body = Body::new(x, y, rand::random::<f64>());
-
-    (brain, body)
-}
-
-fn get_random_position(
-    occupied_positions: &Vec<usize>,
-    grid_width: u32,
-    grid_height: u32,
-) -> (u32, u32) {
-    loop {
-        let x = rand::random::<u32>() % grid_width;
-        let y = rand::random::<u32>() % grid_height;
-
-        let index = grid_coords_to_index(x, y, grid_width);
-
-        if !occupied_positions.contains(&index) {
-            return (x, y);
-        }
     }
 }
