@@ -9,16 +9,16 @@ use super::output_neuron::OutputNeuron;
 
 #[derive(Debug)]
 pub struct Brain {
-    pub connections: Vec<(usize, usize, f32)>,
     pub neurons: Vec<NeuronKind>,
+    pub connections: Vec<(usize, usize, f32)>,
     input_layer: Vec<usize>,
     output_layer: Vec<usize>,
 }
 
 impl Brain {
     pub fn new(hidden_neuron_width: usize) -> Self {
-        let mut connections = Vec::<(usize, usize, f32)>::new();
         let mut neurons = Vec::new();
+        let mut connections = Vec::<(usize, usize, f32)>::new();
 
         let mut input_layer = Vec::new();
 
@@ -69,10 +69,10 @@ impl Brain {
         }
 
         Self {
+            neurons,
             connections,
             input_layer,
             output_layer,
-            neurons,
         }
     }
 
