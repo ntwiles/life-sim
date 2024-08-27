@@ -9,7 +9,7 @@ impl Evolution {}
 #[derive(Debug, Deserialize)]
 pub struct Settings {
     entity_start_count: u32,
-    entity_child_count: usize,
+    entity_child_count: u32,
     entity_mutation_rate: f32,
     entity_mutation_magnitude: f32,
 
@@ -34,7 +34,7 @@ impl Settings {
         s.try_deserialize()
     }
 
-    pub fn entity_child_count(&self) -> usize {
+    pub fn entity_child_count(&self) -> u32 {
         self.entity_child_count
     }
 

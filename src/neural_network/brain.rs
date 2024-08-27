@@ -2,6 +2,8 @@ use rand::seq::{IteratorRandom, SliceRandom};
 
 use strum::IntoEnumIterator;
 
+use crate::grid_config::GridConfig;
+
 use super::hidden_neuron::HiddenNeuron;
 use super::input_neuron::InputNeuron;
 use super::neuron_kind::NeuronKind;
@@ -90,7 +92,7 @@ impl Brain {
         &mut self,
         generation_time: f32,
         danger_dist: (u32, u32),
-        grid_size: (u32, u32),
+        grid_config: &GridConfig,
     ) -> OutputNeuron {
         let mut signals = vec![0.0; self.neurons.len()];
 
@@ -102,8 +104,8 @@ impl Brain {
                 NeuronKind::Input(input) => match input {
                     InputNeuron::Random => rand::random::<f32>(),
                     InputNeuron::Time => generation_time,
-                    InputNeuron::DangerDistX => danger_dist.0 as f32 / grid_size.0 as f32,
-                    InputNeuron::DangerDistY => danger_dist.1 as f32 / grid_size.1 as f32,
+                    InputNeuron::DangerDistX => danger_dist.0 as f32 / grid_config.width as f32,
+                    InputNeuron::DangerDistY => danger_dist.1 as f32 / grid_config.height as f32,
                 },
                 _ => panic!("Input layer should only contain input neurons."),
             };

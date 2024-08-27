@@ -1,3 +1,5 @@
+use crate::grid_config::GridConfig;
+
 use super::neural_network::output_neuron::OutputNeuron;
 
 pub struct Body {
@@ -17,7 +19,7 @@ impl Body {
         }
     }
 
-    pub fn update(&mut self, decision: OutputNeuron, grid_size: (u32, u32)) {
+    pub fn update(&mut self, decision: OutputNeuron, grid_config: &GridConfig) {
         match decision {
             OutputNeuron::Stay => {}
             OutputNeuron::MoveLeft => {
@@ -26,7 +28,7 @@ impl Body {
                 }
             }
             OutputNeuron::MoveRight => {
-                if self.x < grid_size.0 - 1 {
+                if self.x < grid_config.width - 1 {
                     self.x += 1;
                 }
             }
@@ -36,7 +38,7 @@ impl Body {
                 }
             }
             OutputNeuron::MoveDown => {
-                if self.y < grid_size.1 - 1 {
+                if self.y < grid_config.height - 1 {
                     self.y += 1;
                 }
             }
@@ -50,7 +52,7 @@ impl Body {
                         }
                     }
                     1 => {
-                        if self.x < grid_size.0 - 1 {
+                        if self.x < grid_config.width - 1 {
                             self.x += 1;
                         }
                     }
@@ -60,7 +62,7 @@ impl Body {
                         }
                     }
                     3 => {
-                        if self.y < grid_size.1 - 1 {
+                        if self.y < grid_config.height - 1 {
                             self.y += 1;
                         }
                     }

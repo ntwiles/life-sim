@@ -1,14 +1,15 @@
 use cellular_automata::grid::grid_coords_to_index;
 
-use crate::{body::Body, neural_network::brain::Brain};
+use crate::{
+    body::Body, entity_config::EntityConfig, grid_config::GridConfig, neural_network::brain::Brain,
+};
 
 fn spawn_entity(
     brain: Brain,
     occupied_positions: &mut Vec<usize>,
-    grid_width: u32,
-    grid_height: u32,
+    grid_config: &GridConfig,
 ) -> (Brain, Body) {
-    let (x, y) = get_random_position(occupied_positions, grid_width, grid_height);
+    let (x, y) = get_random_position(occupied_positions, grid_config.width, grid_config.height);
     let body = Body::new(x, y, rand::random::<f64>());
     (brain, body)
 }
@@ -16,8 +17,7 @@ fn spawn_entity(
 type SpawnedEntities = (Vec<(Brain, Body)>, Vec<usize>);
 
 pub fn spawn_entities(
-    grid_width: u32,
-    grid_height: u32,
+    grid_config: &GridConfig,
     num_entities: u32,
     neuron_layer_width: usize,
     existing_entities: Option<SpawnedEntities>,
@@ -28,8 +28,7 @@ pub fn spawn_entities(
         let (brain, body) = spawn_entity(
             Brain::new(neuron_layer_width),
             &mut used_positions,
-            grid_width,
-            grid_height,
+            grid_config,
         );
 
         entities.push((brain, body));
@@ -39,36 +38,33 @@ pub fn spawn_entities(
 }
 
 pub fn spawn_next_generation(
-    grid_width: u32,
-    grid_height: u32,
-    max_entities: u32,
+    grid_config: &GridConfig,
+    entity_config: &EntityConfig,
     neuron_layer_width: usize,
-    entity_child_count: u32,
-    entity_mutation_rate: f32,
-    entity_mutation_magnitude: f32,
+
     selected: Vec<&(Brain, Body)>,
 ) -> Vec<(Brain, Body)> {
     let mut next_generation = Vec::<(Brain, Body)>::new();
     let mut used_positions = Vec::<usize>::new();
 
-    let max_selected = max_entities / entity_child_count;
+    let max_selected = entity_config.start_count / entity_config.child_count;
     let selected = selected.iter().take(max_selected as usize);
 
     // Create children for each selected entity.
     for (brain, _) in selected {
-        for _ in 0..entity_child_count {
-            let (brain, body) =
-                spawn_entity(brain.clone(), &mut used_positions, grid_width, grid_height);
+        for _ in 0..entity_config.child_count {
+            let (brain, body) = spawn_entity(brain.clone(), &mut used_positions, grid_config);
 
             next_generation.push((brain, body));
         }
     }
 
     // Apply mutations.
-    let num_to_mutate = (next_generation.len() as f32 * entity_mutation_rate).floor() as usize;
+    let num_to_mutate =
+        (next_generation.len() as f32 * entity_config.mutation_rate).floor() as usize;
     for (brain, body) in next_generation.iter_mut().take(num_to_mutate) {
         let mutation_amount =
-            (rand::random::<f64>() - 0.5) * 2.0 * entity_mutation_magnitude as f64;
+            (rand::random::<f64>() - 0.5) * 2.0 * entity_config.mutation_magnitude as f64;
 
         // TODO: Apply structural mutations.
         brain.mutate_connection(mutation_amount as f32);
@@ -76,10 +72,9 @@ pub fn spawn_next_generation(
     }
 
     // Generate new entities to fill the remaining slots.
-    let num_remaining = max_entities - next_generation.len() as u32;
+    let num_remaining = entity_config.start_count - next_generation.len() as u32;
     let (next_generation, _) = spawn_entities(
-        grid_width,
-        grid_height,
+        grid_config,
         num_remaining,
         neuron_layer_width,
         Some((next_generation, used_positions)),
