@@ -2,8 +2,6 @@ use cellular_automata::grid::grid_coords_to_index;
 
 use crate::{body::Body, neural_network::brain::Brain};
 
-// TODO: These functions have been refactored multiple times; check that the logic still all makes sense.
-
 fn spawn_entity(
     brain: Brain,
     occupied_positions: &mut Vec<usize>,
@@ -56,6 +54,7 @@ pub fn spawn_next_generation(
     let max_selected = max_entities / entity_child_count;
     let selected = selected.iter().take(max_selected as usize);
 
+    // Create children for each selected entity.
     for (brain, _) in selected {
         for _ in 0..entity_child_count {
             let (brain, body) =
@@ -67,17 +66,17 @@ pub fn spawn_next_generation(
 
     // Apply mutations.
     let num_to_mutate = (next_generation.len() as f32 * entity_mutation_rate).floor() as usize;
-
     for (brain, body) in next_generation.iter_mut().take(num_to_mutate) {
         let mutation_amount =
             (rand::random::<f64>() - 0.5) * 2.0 * entity_mutation_magnitude as f64;
 
+        // TODO: Apply structural mutations.
         brain.mutate_connection(mutation_amount as f32);
         body.mutate_color(mutation_amount);
     }
 
+    // Generate new entities to fill the remaining slots.
     let num_remaining = max_entities - next_generation.len() as u32;
-
     let (next_generation, _) = spawn_entities(
         grid_width,
         grid_height,
