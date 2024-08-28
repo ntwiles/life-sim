@@ -11,6 +11,7 @@ use crate::{
     entities::{spawn_entities, spawn_next_generation},
     neural_network_config::NeuralNetworkConfig,
     rendering::additive_blend,
+    util::dot::write_dot_file,
 };
 use crate::{entity_config::EntityConfig, neural_network::brain::Brain};
 use crate::{grid_config::GridConfig, scenario::scenario::Scenario};
@@ -42,6 +43,10 @@ impl LifeSim {
             entity_config.start_count,
             None,
         );
+
+        for i in 0..4 {
+            write_dot_file(&entities[i].0, i);
+        }
 
         Self {
             scenario,
@@ -78,6 +83,10 @@ impl LifeSim {
             &self.network_config,
             selected,
         );
+
+        for i in 0..4 {
+            write_dot_file(&next_generation[i].0, i);
+        }
 
         self.entities = next_generation;
         self.sim_generation_number += 1;

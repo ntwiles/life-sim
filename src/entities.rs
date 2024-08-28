@@ -1,10 +1,7 @@
 use cellular_automata::grid::grid_coords_to_index;
 
 use crate::{
-    body::Body,
-    entity_config::EntityConfig,
-    grid_config::GridConfig,
-    neural_network::{self, brain::Brain},
+    body::Body, entity_config::EntityConfig, grid_config::GridConfig, neural_network::brain::Brain,
     neural_network_config::NeuralNetworkConfig,
 };
 

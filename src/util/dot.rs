@@ -40,7 +40,7 @@ pub fn clear_dot_files() {
     std::fs::create_dir_all("./data/dots").unwrap();
 }
 
-pub fn write_dot_file(brain: &Brain, id: u32) {
+pub fn write_dot_file(brain: &Brain, id: usize) {
     let dot = neural_net_to_dot(brain);
 
     std::fs::write(format!("./data/dots/{}.dot", id), dot).unwrap();

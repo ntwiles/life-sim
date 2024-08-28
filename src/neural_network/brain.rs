@@ -76,7 +76,7 @@ impl Brain {
         let mut output_layer = Vec::new();
 
         // Create random connections from hidden to output.
-        for prev_index in hidden_layer {
+        for prev_index in prev_hidden_layer {
             let output = NeuronKind::Output(
                 OutputNeuron::iter()
                     .choose(&mut rand::thread_rng())
