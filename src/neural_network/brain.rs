@@ -122,6 +122,8 @@ impl Brain {
                     let hidden = match hidden {
                         HiddenNeuron::Identity => signal,
                         HiddenNeuron::Gaussian => (-signal.powi(2) / 2.0).exp(),
+                        HiddenNeuron::Sigmoid => 1.0 / (1.0 + std::f32::consts::E.powf(-signal)),
+                        HiddenNeuron::ReLU => signal.max(0.0),
                     };
 
                     signals[*b_index] += hidden * weight;

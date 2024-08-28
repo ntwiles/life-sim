@@ -6,6 +6,8 @@ use strum_macros::{EnumCount, EnumIter};
 pub enum HiddenNeuron {
     Identity,
     Gaussian,
+    ReLU,
+    Sigmoid,
 }
 
 impl fmt::Display for HiddenNeuron {
@@ -13,6 +15,8 @@ impl fmt::Display for HiddenNeuron {
         match self {
             HiddenNeuron::Identity => write!(f, "Identity"),
             HiddenNeuron::Gaussian => write!(f, "Gaussian"),
+            HiddenNeuron::ReLU => write!(f, "ReLU"),
+            HiddenNeuron::Sigmoid => write!(f, "Sigmoid"),
         }
     }
 }
