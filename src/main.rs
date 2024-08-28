@@ -2,27 +2,25 @@ mod body;
 mod entities;
 mod entity_config;
 mod grid_config;
-mod kill_zone;
 mod life_sim;
 mod neural_network;
 mod neural_network_config;
 mod render_config;
 mod rendering;
+mod scenario;
 mod settings;
-mod simulation_config;
 mod util;
 
 use cellular_automata::sim::run_sim;
 
 use entity_config::EntityConfig;
 use grid_config::GridConfig;
-use kill_zone::KillZone;
 use life_sim::LifeSim;
 use neural_network_config::NeuralNetworkConfig;
 use pixels::Error;
 use render_config::RenderConfig;
+use scenario::{kill_zone::KillZone, scenario_config::ScenarioConfig};
 use settings::Settings;
-use simulation_config::SimulationConfig;
 
 fn main() -> Result<(), Error> {
     let settings = Settings::new().unwrap();
@@ -111,7 +109,7 @@ fn main() -> Result<(), Error> {
         },
     ];
 
-    let sim_config = SimulationConfig {
+    let scenario_config = ScenarioConfig {
         generation_step_count: kill_zones.iter().map(|kz| kz.end_time).max().unwrap(),
         kill_zones,
     };
@@ -121,7 +119,7 @@ fn main() -> Result<(), Error> {
         render_config,
         entity_config,
         network_config,
-        sim_config,
+        scenario_config,
     ));
 
     run_sim(sim)

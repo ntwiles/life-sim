@@ -8,13 +8,13 @@ use cellular_automata::{
 use crate::{
     body::Body,
     entities::{spawn_entities, spawn_next_generation},
-    kill_zone::distance_to_killzone,
     neural_network_config::NeuralNetworkConfig,
     rendering::additive_blend,
+    scenario::kill_zone::distance_to_killzone,
 };
 use crate::{entity_config::EntityConfig, neural_network::brain::Brain};
-use crate::{grid_config::GridConfig, simulation_config::SimulationConfig};
-use crate::{kill_zone::is_point_in_kill_zone, render_config::RenderConfig};
+use crate::{grid_config::GridConfig, scenario::scenario_config::ScenarioConfig};
+use crate::{render_config::RenderConfig, scenario::kill_zone::is_point_in_kill_zone};
 
 pub struct LifeSim {
     entities: Vec<(Brain, Body)>,
@@ -25,7 +25,7 @@ pub struct LifeSim {
     render_config: RenderConfig,
     entity_config: EntityConfig,
     network_config: NeuralNetworkConfig,
-    sim_config: SimulationConfig,
+    scenario_config: ScenarioConfig,
 
     active_kill_zones: Vec<usize>,
 }
@@ -36,7 +36,7 @@ impl LifeSim {
         render_config: RenderConfig,
         entity_config: EntityConfig,
         network_config: NeuralNetworkConfig,
-        sim_config: SimulationConfig,
+        scenario_config: ScenarioConfig,
     ) -> Self {
         let (entities, _) = spawn_entities(
             &grid_config,
@@ -50,7 +50,7 @@ impl LifeSim {
             grid_config,
             render_config,
             network_config,
-            sim_config,
+            scenario_config,
 
             entities,
             sim_current_step: 0,
@@ -92,21 +92,17 @@ type EntityColors = HashMap<(u32, u32), f64>;
 impl Automata<EntityColors> for LifeSim {
     fn update(&mut self) {
         let generation_time =
-            self.sim_current_step as f32 / self.sim_config.generation_step_count as f32;
+            self.sim_current_step as f32 / self.scenario_config.generation_step_count as f32;
 
-        self.active_kill_zones =
-            self.sim_config
-                .kill_zones
-                .iter()
-                .enumerate()
-                .fold(Vec::new(), |mut acc, (i, kz)| {
-                    if self.sim_current_step >= kz.start_time
-                        && self.sim_current_step <= kz.end_time
-                    {
-                        acc.push(i);
-                    }
-                    acc
-                });
+        self.active_kill_zones = self.scenario_config.kill_zones.iter().enumerate().fold(
+            Vec::new(),
+            |mut acc, (i, kz)| {
+                if self.sim_current_step >= kz.start_time && self.sim_current_step <= kz.end_time {
+                    acc.push(i);
+                }
+                acc
+            },
+        );
 
         for (brain, body) in &mut self.entities {
             if !body.is_alive {
@@ -114,7 +110,7 @@ impl Automata<EntityColors> for LifeSim {
             }
 
             let danger_dist = distance_to_killzone(
-                &self.sim_config.kill_zones,
+                &self.scenario_config.kill_zones,
                 &self.active_kill_zones,
                 (body.x, body.y),
             );
@@ -127,7 +123,7 @@ impl Automata<EntityColors> for LifeSim {
             }
         }
 
-        if self.sim_current_step >= self.sim_config.generation_step_count {
+        if self.sim_current_step >= self.scenario_config.generation_step_count {
             self.start_new_generation();
         } else {
             self.sim_current_step += 1;
@@ -163,7 +159,7 @@ impl Automata<EntityColors> for LifeSim {
         };
 
         let color = if is_point_in_kill_zone(
-            &self.sim_config.kill_zones,
+            &self.scenario_config.kill_zones,
             &self.active_kill_zones,
             (x, y),
             self.sim_current_step,
