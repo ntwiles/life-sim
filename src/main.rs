@@ -53,7 +53,7 @@ fn main() -> Result<(), Error> {
         connection_mutation_rate: settings.neural_network_connection_mutation_rate,
         connection_mutation_magnitude: settings.neural_network_connection_mutation_magnitude,
 
-        structural_mutation_rate: settings.neural_network_structural_mutation_rate,
+        structure_mutation_rate: settings.neural_network_structure_mutation_rate,
     };
 
     let kill_zones = vec![

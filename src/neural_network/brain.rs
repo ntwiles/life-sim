@@ -98,8 +98,6 @@ impl Brain {
             connections.push((prev_index, output_index, weight));
         }
 
-        println!("{:?}", hidden_neurons);
-
         Self {
             neurons,
             connections,
@@ -129,7 +127,7 @@ impl Brain {
 
     pub fn mutate_structure(&mut self, network_config: &NeuralNetworkConfig) {
         let num_to_mutate =
-            (self.connections.len() as f32 * network_config.structural_mutation_rate) as usize;
+            (self.connections.len() as f32 * network_config.structure_mutation_rate) as usize;
 
         let mut rng = rand::thread_rng();
 

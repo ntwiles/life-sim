@@ -7,5 +7,5 @@ pub struct NeuralNetworkConfig {
     pub connection_mutation_rate: f32,
     pub connection_mutation_magnitude: f32,
 
-    pub structural_mutation_rate: f32,
+    pub structure_mutation_rate: f32,
 }
