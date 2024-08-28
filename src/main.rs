@@ -19,7 +19,7 @@ use life_sim::LifeSim;
 use neural_network_config::NeuralNetworkConfig;
 use pixels::Error;
 use render_config::RenderConfig;
-use scenario::{kill_zone::KillZone, scenario_config::ScenarioConfig};
+use scenario::{kill_zone::KillZone, scenario::Scenario};
 use settings::Settings;
 
 fn main() -> Result<(), Error> {
@@ -109,17 +109,14 @@ fn main() -> Result<(), Error> {
         },
     ];
 
-    let scenario_config = ScenarioConfig {
-        generation_step_count: kill_zones.iter().map(|kz| kz.end_time).max().unwrap(),
-        kill_zones,
-    };
+    let scenario = Scenario::new(kill_zones);
 
     let sim = Box::new(LifeSim::new(
+        scenario,
         grid_config,
         render_config,
         entity_config,
         network_config,
-        scenario_config,
     ));
 
     run_sim(sim)
