@@ -46,6 +46,7 @@ fn main() -> Result<(), Error> {
 
     let network_config = NeuralNetworkConfig {
         hidden_layer_width: settings.neural_network_hidden_layer_width,
+        hidden_layer_depth: settings.neural_network_hidden_layer_depth,
         mutation_rate: settings.neural_network_mutation_rate,
         mutation_magnitude: settings.neural_network_mutation_magnitude,
     };

@@ -1,7 +1,10 @@
 use cellular_automata::grid::grid_coords_to_index;
 
 use crate::{
-    body::Body, entity_config::EntityConfig, grid_config::GridConfig, neural_network::brain::Brain,
+    body::Body,
+    entity_config::EntityConfig,
+    grid_config::GridConfig,
+    neural_network::{self, brain::Brain},
     neural_network_config::NeuralNetworkConfig,
 };
 
@@ -19,15 +22,18 @@ type SpawnedEntities = (Vec<(Brain, Body)>, Vec<usize>);
 
 pub fn spawn_entities(
     grid_config: &GridConfig,
+    network_config: &NeuralNetworkConfig,
     num_entities: u32,
-    neuron_layer_width: usize,
     existing_entities: Option<SpawnedEntities>,
 ) -> SpawnedEntities {
     let (mut entities, mut used_positions) = existing_entities.unwrap_or((Vec::new(), Vec::new()));
 
     for _ in 0..num_entities {
         let (brain, body) = spawn_entity(
-            Brain::new(neuron_layer_width),
+            Brain::new(
+                network_config.hidden_layer_width,
+                network_config.hidden_layer_depth,
+            ),
             &mut used_positions,
             grid_config,
         );
@@ -76,8 +82,8 @@ pub fn spawn_next_generation(
     let num_remaining = entity_config.start_count - next_generation.len() as u32;
     let (next_generation, _) = spawn_entities(
         grid_config,
+        network_config,
         num_remaining,
-        network_config.hidden_layer_width,
         Some((next_generation, used_positions)),
     );
 

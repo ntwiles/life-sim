@@ -15,6 +15,7 @@ pub struct Settings {
     pub grid_height: u32,
 
     pub neural_network_hidden_layer_width: usize,
+    pub neural_network_hidden_layer_depth: usize,
     pub neural_network_mutation_rate: f32,
     pub neural_network_mutation_magnitude: f32,
 

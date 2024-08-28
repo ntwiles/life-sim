@@ -38,8 +38,8 @@ impl LifeSim {
     ) -> Self {
         let (entities, _) = spawn_entities(
             &grid_config,
+            &network_config,
             entity_config.start_count,
-            network_config.hidden_layer_width,
             None,
         );
 

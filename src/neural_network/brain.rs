@@ -18,7 +18,7 @@ pub struct Brain {
 }
 
 impl Brain {
-    pub fn new(hidden_neuron_width: usize) -> Self {
+    pub fn new(hidden_neuron_width: usize, hidden_neuron_depth: usize) -> Self {
         let mut neurons = Vec::new();
         let mut connections = Vec::<(usize, usize, f32)>::new();
 
@@ -48,6 +48,29 @@ impl Brain {
             let weight = (rand::random::<f32>() - 0.5) * 2.0;
 
             connections.push((input_index, hidden_index, weight));
+        }
+
+        let mut prev_hidden_layer = hidden_layer;
+        let mut hidden_layer = Vec::new();
+
+        // Create random connections from hidden to hidden.
+        for _ in 0..hidden_neuron_depth - 1 {
+            for prev_index in &prev_hidden_layer {
+                let mut rng = rand::thread_rng();
+                let hidden = NeuronKind::Hidden(HiddenNeuron::iter().choose(&mut rng).unwrap());
+
+                let hidden_index = neurons.len();
+                neurons.push(hidden);
+                hidden_layer.push(hidden_index);
+
+                // between -1.0 and 1.0.
+                let weight = (rand::random::<f32>() - 0.5) * 2.0;
+
+                connections.push((*prev_index, hidden_index, weight));
+            }
+
+            prev_hidden_layer = hidden_layer;
+            hidden_layer = Vec::new();
         }
 
         let mut output_layer = Vec::new();
@@ -124,6 +147,7 @@ impl Brain {
                         HiddenNeuron::Gaussian => (-signal.powi(2) / 2.0).exp(),
                         HiddenNeuron::Sigmoid => 1.0 / (1.0 + std::f32::consts::E.powf(-signal)),
                         HiddenNeuron::ReLU => signal.max(0.0),
+                        HiddenNeuron::Tanh => signal.tanh(),
                     };
 
                     signals[*b_index] += hidden * weight;

@@ -8,6 +8,7 @@ pub enum HiddenNeuron {
     Gaussian,
     ReLU,
     Sigmoid,
+    Tanh,
 }
 
 impl fmt::Display for HiddenNeuron {
@@ -17,6 +18,7 @@ impl fmt::Display for HiddenNeuron {
             HiddenNeuron::Gaussian => write!(f, "Gaussian"),
             HiddenNeuron::ReLU => write!(f, "ReLU"),
             HiddenNeuron::Sigmoid => write!(f, "Sigmoid"),
+            HiddenNeuron::Tanh => write!(f, "Tanh"),
         }
     }
 }
