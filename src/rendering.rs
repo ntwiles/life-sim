@@ -1,4 +1,4 @@
-pub fn alpha_blend(source: [u8; 4], destination: [u8; 4]) -> [u8; 4] {
+pub fn _alpha_blend(source: [u8; 4], destination: [u8; 4]) -> [u8; 4] {
     let alpha = source[3] as f32 / 255.0;
     let inv_alpha = 1.0 - alpha;
 

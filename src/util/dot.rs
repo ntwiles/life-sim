@@ -35,11 +35,6 @@ fn neural_net_to_dot(brain: &Brain) -> String {
     std::str::from_utf8(&bytes).unwrap().to_string()
 }
 
-pub fn clear_dot_files() {
-    std::fs::remove_dir_all("./data/dots").unwrap();
-    std::fs::create_dir_all("./data/dots").unwrap();
-}
-
 pub fn write_dot_file(brain: &Brain, id: usize) {
     let dot = neural_net_to_dot(brain);
 
