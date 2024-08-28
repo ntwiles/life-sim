@@ -66,13 +66,11 @@ pub fn spawn_next_generation(
     // Apply mutations.
     let num_to_mutate =
         (next_generation.len() as f32 * network_config.mutation_rate).floor() as usize;
-    for (brain, body) in next_generation.iter_mut().take(num_to_mutate) {
-        let mutation_amount =
-            (rand::random::<f64>() - 0.5) * 2.0 * network_config.mutation_magnitude as f64;
 
-        // TODO: Apply structural mutations.
-        brain.mutate_connection(mutation_amount as f32);
-        body.mutate_color(mutation_amount);
+    for (brain, body) in next_generation.iter_mut().take(num_to_mutate) {
+        brain.mutate_connections(network_config);
+        brain.mutate_structure(network_config);
+        body.mutate_color();
     }
 
     // Generate new entities to fill the remaining slots.

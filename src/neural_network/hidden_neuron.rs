@@ -2,7 +2,7 @@ use std::fmt;
 
 use strum_macros::{EnumCount, EnumIter};
 
-#[derive(Clone, Copy, Debug, EnumIter, EnumCount)]
+#[derive(Clone, Copy, Debug, EnumIter, EnumCount, PartialEq)]
 pub enum HiddenNeuron {
     Identity,
     Gaussian,

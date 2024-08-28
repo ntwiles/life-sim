@@ -8,7 +8,11 @@ grid_height = 150
 neural_network_hidden_layer_width = 10
 neural_network_hidden_layer_depth = 2
 neural_network_mutation_rate = 0.25
-neural_network_mutation_magnitude = 0.2
+
+neural_network_connection_mutation_rate = 0.15
+neural_network_connection_mutation_magnitude = 0.2
+
+neural_network_structure_mutation_rate = 0.05
 
 render_killzone_color = [150, 45, 0, 255]
 render_background_color = [18, 22, 30, 255]
