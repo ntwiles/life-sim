@@ -5,7 +5,6 @@ use cellular_automata::{
     viewport::{viewport_index_to_coords, viewport_to_grid},
 };
 
-use crate::render_config::RenderConfig;
 use crate::{
     body::Body,
     entities::{spawn_entities, spawn_next_generation},
@@ -15,6 +14,7 @@ use crate::{
 };
 use crate::{entity_config::EntityConfig, neural_network::brain::Brain};
 use crate::{grid_config::GridConfig, scenario::scenario::Scenario};
+use crate::{render_config::RenderConfig, vector_2d::Vector2D};
 
 pub struct LifeSim {
     entities: Vec<(Brain, Body)>,
@@ -110,10 +110,24 @@ impl Automata<EntityColors> for LifeSim {
 
             let danger_dist = self.scenario.distance_to_killzone((body.x, body.y));
 
+            let danger_dir = Vector2D {
+                x: danger_dist.0 as f32,
+                y: danger_dist.1 as f32,
+            }
+            .normalize();
+
+            let danger_angle = danger_dir.y.atan2(danger_dir.x);
+
             if danger_dist == (0, 0) {
                 body.is_alive = false;
             } else {
-                let decision = brain.decide(generation_time, danger_dist, &self.grid_config);
+                let decision = brain.decide(
+                    generation_time,
+                    danger_dist,
+                    danger_angle.sin(),
+                    danger_angle.cos(),
+                    &self.grid_config,
+                );
                 body.update(decision, &self.grid_config);
             }
         }

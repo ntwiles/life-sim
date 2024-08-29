@@ -10,6 +10,7 @@ mod rendering;
 mod scenario;
 mod settings;
 mod util;
+mod vector_2d;
 
 use cellular_automata::sim::run_sim;
 

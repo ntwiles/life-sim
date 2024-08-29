@@ -7,6 +7,8 @@ pub enum InputNeuron {
     Time,
     DangerDistX,
     DangerDistY,
+    DangerDirSin,
+    DangerDirCos,
 }
 
 impl fmt::Display for InputNeuron {
@@ -16,6 +18,8 @@ impl fmt::Display for InputNeuron {
             InputNeuron::Time => write!(f, "Time"),
             InputNeuron::DangerDistX => write!(f, "DangerDistX"),
             InputNeuron::DangerDistY => write!(f, "DangerDistY"),
+            InputNeuron::DangerDirSin => write!(f, "DangerDirSin"),
+            InputNeuron::DangerDirCos => write!(f, "DangerDirCos"),
         }
     }
 }
