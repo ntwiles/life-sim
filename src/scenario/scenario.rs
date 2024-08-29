@@ -49,7 +49,7 @@ impl Scenario {
                 });
     }
 
-    pub fn distance_to_killzone(&self, (x, y): (u32, u32)) -> (u32, u32) {
+    pub fn shortest_killzone_displacement(&self, (x, y): (u32, u32)) -> (u32, u32) {
         // TODO: This has a map and a fold and can probably be optimized.
         self.active_kill_zones
             .iter()

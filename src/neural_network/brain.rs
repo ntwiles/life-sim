@@ -155,10 +155,9 @@ impl Brain {
     pub fn decide(
         &mut self,
         generation_time: f32,
-        danger_dist: (u32, u32),
+        danger_dist: f32,
         danger_dir_sin: f32,
         danger_dir_cos: f32,
-        grid_config: &GridConfig,
     ) -> OutputNeuron {
         let mut signals = vec![0.0; self.neurons.len()];
 
@@ -170,9 +169,7 @@ impl Brain {
                 NeuronKind::Input(input) => match input {
                     InputNeuron::Random => rand::random::<f32>(),
                     InputNeuron::Time => generation_time,
-                    // TODO: This is probably not the best way to normalize these values.
-                    InputNeuron::DangerDistX => danger_dist.0 as f32 / grid_config.width as f32,
-                    InputNeuron::DangerDistY => danger_dist.1 as f32 / grid_config.height as f32,
+                    InputNeuron::DangerDist => danger_dist,
                     InputNeuron::DangerDirCos => danger_dir_cos,
                     InputNeuron::DangerDirSin => danger_dir_sin,
                 },

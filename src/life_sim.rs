@@ -108,25 +108,28 @@ impl Automata<EntityColors> for LifeSim {
                 continue;
             }
 
-            let danger_dist = self.scenario.distance_to_killzone((body.x, body.y));
+            let killzone_disp = self
+                .scenario
+                .shortest_killzone_displacement((body.x, body.y));
 
-            let danger_dir = Vector2D {
-                x: danger_dist.0 as f32,
-                y: danger_dist.1 as f32,
-            }
-            .normalize();
+            let killzone_dist_xy = Vector2D {
+                x: killzone_disp.0 as f32,
+                y: killzone_disp.1 as f32,
+            };
 
-            let danger_angle = danger_dir.y.atan2(danger_dir.x);
+            let killzone_dist = killzone_dist_xy.magnitude();
+            let killzone_dir = killzone_dist_xy.normalize();
 
-            if danger_dist == (0, 0) {
+            let danger_angle = killzone_dir.y.atan2(killzone_dir.x);
+
+            if killzone_disp == (0, 0) {
                 body.is_alive = false;
             } else {
                 let decision = brain.decide(
                     generation_time,
-                    danger_dist,
+                    killzone_dist,
                     danger_angle.sin(),
                     danger_angle.cos(),
-                    &self.grid_config,
                 );
                 body.update(decision, &self.grid_config);
             }
