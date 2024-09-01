@@ -67,6 +67,12 @@ pub fn spawn_next_generation(
     let num_to_mutate =
         (next_generation.len() as f32 * network_config.mutation_rate).floor() as usize;
 
+    println!(
+        "Mutating {}/{} entities",
+        num_to_mutate,
+        next_generation.len()
+    );
+
     for (brain, body) in next_generation.iter_mut().take(num_to_mutate) {
         brain.mutate_connections(network_config);
         brain.mutate_structure(network_config);

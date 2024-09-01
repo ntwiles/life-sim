@@ -14,6 +14,7 @@ pub enum OutputNeuron {
 impl fmt::Display for OutputNeuron {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            // TODO: Consider removing random move.
             OutputNeuron::MoveRandom => write!(f, "MoveRandom"),
             OutputNeuron::MoveUp => write!(f, "MoveUp"),
             OutputNeuron::MoveDown => write!(f, "MoveDown"),

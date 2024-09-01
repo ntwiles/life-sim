@@ -2,7 +2,6 @@ use rand::seq::{IteratorRandom, SliceRandom};
 
 use strum::IntoEnumIterator;
 
-use crate::grid_config::GridConfig;
 use crate::neural_network_config::NeuralNetworkConfig;
 
 use super::hidden_neuron::HiddenNeuron;
@@ -14,6 +13,8 @@ use super::output_neuron::OutputNeuron;
 pub struct Brain {
     pub neurons: Vec<NeuronKind>,
     pub connections: Vec<(usize, usize, f32)>,
+
+    previous_move: OutputNeuron,
     input_neurons: Vec<usize>,
     hidden_neurons: Vec<usize>,
     output_neurons: Vec<usize>,
@@ -104,6 +105,7 @@ impl Brain {
             input_neurons,
             hidden_neurons,
             output_neurons,
+            previous_move: OutputNeuron::MoveRight,
         }
     }
 
@@ -168,6 +170,22 @@ impl Brain {
             let raw_signal: f32 = match input {
                 NeuronKind::Input(input) => match input {
                     InputNeuron::Random => rand::random::<f32>(),
+                    InputNeuron::PreviousMoveDirCos => match self.previous_move {
+                        OutputNeuron::MoveLeft => -1.0,
+                        OutputNeuron::MoveRight => 1.0,
+                        OutputNeuron::MoveUp => 0.0,
+                        OutputNeuron::MoveDown => 0.0,
+                        OutputNeuron::Stay => 0.0,
+                        OutputNeuron::MoveRandom => 0.0,
+                    },
+                    InputNeuron::PreviousMoveDirSin => match self.previous_move {
+                        OutputNeuron::MoveLeft => 0.0,
+                        OutputNeuron::MoveRight => 0.0,
+                        OutputNeuron::MoveUp => 1.0,
+                        OutputNeuron::MoveDown => -1.0,
+                        OutputNeuron::Stay => 0.0,
+                        OutputNeuron::MoveRandom => 0.0,
+                    },
                     InputNeuron::Time => generation_time,
                     InputNeuron::DangerDist => danger_dist,
                     InputNeuron::DangerDirCos => danger_dir_cos,
@@ -218,7 +236,8 @@ impl Brain {
             }
         }
 
-        decision.1
+        self.previous_move = decision.1;
+        self.previous_move
     }
 }
 
@@ -230,6 +249,7 @@ impl Clone for Brain {
             output_neurons: self.output_neurons.clone(),
             connections: self.connections.clone(),
             neurons: self.neurons.clone(),
+            previous_move: OutputNeuron::MoveRight,
         }
     }
 }
