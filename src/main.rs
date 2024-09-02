@@ -12,7 +12,7 @@ mod settings;
 mod util;
 mod vector_2d;
 
-use cellular_automata::sim::run_sim;
+use cellular_automata::{sim::run_sim, sim_config::SimConfig};
 
 use entity_config::EntityConfig;
 use grid_config::GridConfig;
@@ -126,5 +126,10 @@ fn main() -> Result<(), Error> {
         network_config,
     ));
 
-    run_sim(sim)
+    run_sim(
+        sim,
+        Some(SimConfig {
+            debug: settings.debug,
+        }),
+    )
 }

@@ -27,6 +27,8 @@ pub struct Settings {
     pub render_killzone_color: [u8; 4],
     pub render_background_color: [u8; 4],
     pub render_pixel_scale: u32,
+
+    pub debug: bool,
 }
 
 impl Settings {
