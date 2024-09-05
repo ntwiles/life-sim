@@ -5,7 +5,7 @@ grid_width = 150
 grid_height = 150
 
 neural_network_hidden_layer_width = 10
-neural_network_hidden_layer_depth = 2
+neural_network_hidden_layer_depth = 3
 neural_network_mutation_rate = 0.001
 
 neural_network_connection_mutation_rate = 0.15

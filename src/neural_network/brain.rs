@@ -1,9 +1,8 @@
-use rand::seq::{IteratorRandom, SliceRandom};
+use std::collections::HashMap;
 
-use strum::IntoEnumIterator;
+use crate::genome::gene::Gene;
 
-use crate::neural_network_config::NeuralNetworkConfig;
-
+use super::connection::Connection;
 use super::hidden_neuron::HiddenNeuron;
 use super::input_neuron::InputNeuron;
 use super::neuron_kind::NeuronKind;
@@ -12,145 +11,108 @@ use super::output_neuron::OutputNeuron;
 #[derive(Debug)]
 pub struct Brain {
     pub neurons: Vec<NeuronKind>,
-    pub connections: Vec<(usize, usize, f32)>,
+    pub connections: Vec<Connection>,
+    pub genome: Vec<Gene>,
 
     previous_move: OutputNeuron,
-    input_neurons: Vec<usize>,
-    hidden_neurons: Vec<usize>,
-    output_neurons: Vec<usize>,
+    input_neurons: Vec<u16>,
+    output_neurons: Vec<u16>,
 }
 
 impl Brain {
-    pub fn new(hidden_neuron_width: usize, hidden_neuron_depth: usize) -> Self {
+    pub fn from_genome(genome: Vec<Gene>) -> Self {
         let mut neurons = Vec::new();
-        let mut connections = Vec::<(usize, usize, f32)>::new();
-
         let mut input_neurons = Vec::new();
-
-        for input in InputNeuron::iter() {
-            let input_index = neurons.len();
-            neurons.push(NeuronKind::Input(input));
-            input_neurons.push(input_index);
-        }
-
-        let mut current_hidden_layer = Vec::new();
-
-        // Create random connections from input to hidden.
-        for _ in 0..hidden_neuron_width {
-            let input_index = input_neurons[rand::random::<usize>() % input_neurons.len()];
-
-            let mut rng = rand::thread_rng();
-            let hidden = NeuronKind::Hidden(HiddenNeuron::iter().choose(&mut rng).unwrap());
-
-            let hidden_index = neurons.len();
-            neurons.push(hidden);
-
-            current_hidden_layer.push(hidden_index);
-
-            // between -1.0 and 1.0.
-            let weight = (rand::random::<f32>() - 0.5) * 2.0;
-
-            connections.push((input_index, hidden_index, weight));
-        }
-
-        let mut hidden_neurons = current_hidden_layer.clone();
-        let mut prev_hidden_layer = current_hidden_layer;
-
-        current_hidden_layer = Vec::new();
-
-        // Create random connections from hidden to hidden.
-        for _ in 0..hidden_neuron_depth - 1 {
-            for prev_index in &prev_hidden_layer {
-                let mut rng = rand::thread_rng();
-                let hidden = NeuronKind::Hidden(HiddenNeuron::iter().choose(&mut rng).unwrap());
-
-                let hidden_index = neurons.len();
-                neurons.push(hidden);
-                current_hidden_layer.push(hidden_index);
-
-                // between -1.0 and 1.0.
-                let weight = (rand::random::<f32>() - 0.5) * 2.0;
-
-                connections.push((*prev_index, hidden_index, weight));
-            }
-
-            hidden_neurons.extend(&current_hidden_layer.clone());
-            prev_hidden_layer = current_hidden_layer;
-            current_hidden_layer = Vec::new();
-        }
-
         let mut output_neurons = Vec::new();
+        let mut connections = Vec::new();
 
-        // Create random connections from hidden to output.
-        for prev_index in prev_hidden_layer {
-            let output = NeuronKind::Output(
-                OutputNeuron::iter()
-                    .choose(&mut rand::thread_rng())
-                    .unwrap(),
-            );
+        let mut input_instance = HashMap::<(u16, u16), u16>::new();
+        let mut hidden_instances = HashMap::<(u16, u16), u16>::new();
+        let mut output_instances = HashMap::<(u16, u16), u16>::new();
 
-            let output_index = neurons.len();
-            neurons.push(output);
-            output_neurons.push(output_index);
+        for gene in &genome {
+            let Gene {
+                source_discriminant,
+                source_is_hidden,
+                source_instance,
+                target_discriminant,
+                target_is_output,
+                target_instance,
+                weight,
+            } = gene;
 
-            // between -1.0 and 1.0.
-            let weight = (rand::random::<f32>() - 0.5) * 2.0;
+            let source_instances = if *source_is_hidden {
+                &mut hidden_instances
+            } else {
+                &mut input_instance
+            };
 
-            connections.push((prev_index, output_index, weight));
+            let key = (*source_discriminant, *source_instance);
+
+            let source_index = if source_instances.contains_key(&key) {
+                *source_instances.get(&key).unwrap()
+            } else {
+                let source_index = neurons.len() as u16;
+                source_instances.insert(key, source_index);
+
+                if *source_is_hidden {
+                    neurons.push(NeuronKind::Hidden(HiddenNeuron::from_discriminant(
+                        *source_discriminant as usize,
+                    )));
+                } else {
+                    input_neurons.push(source_index);
+                    neurons.push(NeuronKind::Input(InputNeuron::from_discriminant(
+                        *source_discriminant as usize,
+                    )));
+                };
+
+                source_index
+            };
+
+            let target_instances = if *target_is_output {
+                &mut output_instances
+            } else {
+                &mut hidden_instances
+            };
+
+            let key = (*target_discriminant, *target_instance);
+
+            let target_index = if target_instances.contains_key(&key) {
+                *target_instances.get(&key).unwrap()
+            } else {
+                let target_index = neurons.len() as u16;
+                target_instances.insert(key, target_index);
+
+                if *target_is_output {
+                    output_neurons.push(target_index);
+                    neurons.push(NeuronKind::Output(OutputNeuron::from_discriminant(
+                        *target_discriminant as usize,
+                    )));
+                } else {
+                    neurons.push(NeuronKind::Hidden(HiddenNeuron::from_discriminant(
+                        *target_discriminant as usize,
+                    )));
+                };
+
+                target_index
+            };
+
+            let connection = Connection {
+                source: source_index,
+                target: target_index,
+                weight: *weight,
+            };
+
+            connections.push(connection)
         }
 
         Self {
+            genome,
             neurons,
             connections,
             input_neurons,
-            hidden_neurons,
             output_neurons,
             previous_move: OutputNeuron::MoveRight,
-        }
-    }
-
-    pub fn mutate_connections(&mut self, network_config: &NeuralNetworkConfig) {
-        let num_to_mutate =
-            (self.connections.len() as f32 * network_config.connection_mutation_rate) as usize;
-
-        for _ in 0..num_to_mutate {
-            let mutation_amount =
-                (rand::random::<f32>() - 0.5) * 2.0 * network_config.connection_mutation_magnitude;
-
-            let connection = self
-                .connections
-                .choose_mut(&mut rand::thread_rng())
-                .unwrap();
-
-            connection.2 += mutation_amount;
-            connection.2 = connection.2.max(-1.0).min(1.0);
-        }
-    }
-
-    pub fn mutate_structure(&mut self, network_config: &NeuralNetworkConfig) {
-        let num_to_mutate =
-            (self.connections.len() as f32 * network_config.structure_mutation_rate) as usize;
-
-        let mut rng = rand::thread_rng();
-
-        for _ in 0..num_to_mutate {
-            let existing = self.hidden_neurons[rand::random::<usize>() % self.hidden_neurons.len()];
-
-            loop {
-                let new_type = NeuronKind::Hidden(HiddenNeuron::iter().choose(&mut rng).unwrap());
-
-                if new_type != self.neurons[existing] {
-                    self.neurons[existing] = new_type;
-                    break;
-                }
-            }
-
-            let a_index = self.neurons.len() - 2;
-            let b_index = self.neurons.len() - 1;
-
-            let weight = (rand::random::<f32>() - 0.5) * 2.0;
-
-            self.connections.push((a_index, b_index, weight));
         }
     }
 
@@ -165,7 +127,7 @@ impl Brain {
 
         // Initialize input signals.
         for input_index in &self.input_neurons {
-            let input = &self.neurons[*input_index];
+            let input = &self.neurons[*input_index as usize];
 
             let raw_signal: f32 = match input {
                 NeuronKind::Input(input) => match input {
@@ -194,14 +156,19 @@ impl Brain {
                 _ => panic!("Input layer should only contain input neurons."),
             };
 
-            signals[*input_index] = raw_signal;
+            signals[*input_index as usize] = raw_signal;
         }
 
         // Propogate signals through the network.
-        for (a_index, b_index, weight) in &self.connections {
-            let signal = signals[*a_index];
+        for Connection {
+            source,
+            target,
+            weight,
+        } in &self.connections
+        {
+            let signal = signals[*source as usize];
 
-            match &self.neurons[*b_index] {
+            match &self.neurons[*target as usize] {
                 NeuronKind::Hidden(hidden) => {
                     let hidden = match hidden {
                         HiddenNeuron::Identity => signal,
@@ -211,25 +178,25 @@ impl Brain {
                         HiddenNeuron::Tanh => signal.tanh(),
                     };
 
-                    signals[*b_index] += hidden * weight;
+                    signals[*target as usize] += hidden * weight;
                 }
                 NeuronKind::Output(_) => {}
                 _ => panic!("Connections should end in hidden or output neurons."),
             }
 
-            signals[*b_index] += signal * weight;
+            signals[*target as usize] += signal * weight;
         }
 
         let mut decision = (f32::NEG_INFINITY, OutputNeuron::MoveRandom);
 
         // Check if each output neuron should fire.
         for output_index in &self.output_neurons {
-            let output = match self.neurons[*output_index] {
+            let output = match self.neurons[*output_index as usize] {
                 NeuronKind::Output(output) => output,
                 _ => panic!("Output layer should only contain output neurons."),
             };
 
-            let signal = signals[*output_index].tanh();
+            let signal = signals[*output_index as usize].tanh();
 
             if signal >= decision.0 {
                 decision = (signal, output);
@@ -245,9 +212,9 @@ impl Clone for Brain {
     fn clone(&self) -> Self {
         Self {
             input_neurons: self.input_neurons.clone(),
-            hidden_neurons: self.hidden_neurons.clone(),
             output_neurons: self.output_neurons.clone(),
             connections: self.connections.clone(),
+            genome: self.genome.clone(),
             neurons: self.neurons.clone(),
             previous_move: OutputNeuron::MoveRight,
         }

@@ -19,11 +19,6 @@ pub struct Settings {
 
     pub neural_network_mutation_rate: f32,
 
-    pub neural_network_connection_mutation_rate: f32,
-    pub neural_network_connection_mutation_magnitude: f32,
-
-    pub neural_network_structure_mutation_rate: f32,
-
     pub render_killzone_color: [u8; 4],
     pub render_background_color: [u8; 4],
     pub render_pixel_scale: u32,

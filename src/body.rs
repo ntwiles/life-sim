@@ -71,11 +71,6 @@ impl Body {
             }
         }
     }
-
-    pub fn mutate_color(&mut self) {
-        let mutation_amount = (rand::random::<f64>() - 0.5) * 2.0;
-        self.color_gradient_index += mutation_amount;
-    }
 }
 
 impl Clone for Body {

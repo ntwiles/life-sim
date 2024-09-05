@@ -1,9 +1,10 @@
 mod body;
 mod entities;
 mod entity_config;
+mod genome;
 mod grid_config;
 mod life_sim;
-mod neural_network;
+pub mod neural_network;
 mod neural_network_config;
 mod render_config;
 mod rendering;
@@ -50,11 +51,6 @@ fn main() -> Result<(), Error> {
         hidden_layer_depth: settings.neural_network_hidden_layer_depth,
 
         mutation_rate: settings.neural_network_mutation_rate,
-
-        connection_mutation_rate: settings.neural_network_connection_mutation_rate,
-        connection_mutation_magnitude: settings.neural_network_connection_mutation_magnitude,
-
-        structure_mutation_rate: settings.neural_network_structure_mutation_rate,
     };
 
     let kill_zones = vec![

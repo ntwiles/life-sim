@@ -1,9 +1,10 @@
 use dot_writer::{Attributes, DotWriter};
 
 use crate::neural_network::brain::Brain;
+use crate::neural_network::connection::Connection;
 use crate::neural_network::neuron_kind::NeuronKind;
 
-fn get_neuron_label(neuron: &NeuronKind, index: usize) -> String {
+fn get_neuron_label(neuron: &NeuronKind, index: u16) -> String {
     match neuron {
         NeuronKind::Input(input) => format!("{}_{}", input, index),
         NeuronKind::Hidden(hidden) => format!("{}_{}", hidden, index),
@@ -19,9 +20,14 @@ fn neural_net_to_dot(brain: &Brain) -> String {
 
     let mut graph = writer.digraph();
 
-    for (a, b, weight) in &brain.connections {
-        let a_label = get_neuron_label(&brain.neurons[*a as usize], *a);
-        let b_label = get_neuron_label(&brain.neurons[*b as usize], *b);
+    for Connection {
+        source,
+        target,
+        weight,
+    } in &brain.connections
+    {
+        let a_label = get_neuron_label(&brain.neurons[*source as usize], *source);
+        let b_label = get_neuron_label(&brain.neurons[*target as usize], *target);
 
         graph
             .edge_attributes()

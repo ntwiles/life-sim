@@ -1,7 +1,11 @@
 use cellular_automata::grid::grid_coords_to_index;
 
 use crate::{
-    body::Body, entity_config::EntityConfig, grid_config::GridConfig, neural_network::brain::Brain,
+    body::Body,
+    entity_config::EntityConfig,
+    genome::{mutation::flip_random_bit, random_genome},
+    grid_config::GridConfig,
+    neural_network::brain::Brain,
     neural_network_config::NeuralNetworkConfig,
 };
 
@@ -26,14 +30,9 @@ pub fn spawn_entities(
     let (mut entities, mut used_positions) = existing_entities.unwrap_or((Vec::new(), Vec::new()));
 
     for _ in 0..num_entities {
-        let (brain, body) = spawn_entity(
-            Brain::new(
-                network_config.hidden_layer_width,
-                network_config.hidden_layer_depth,
-            ),
-            &mut used_positions,
-            grid_config,
-        );
+        let genome = random_genome(network_config);
+        let (brain, body) =
+            spawn_entity(Brain::from_genome(genome), &mut used_positions, grid_config);
 
         entities.push((brain, body));
     }
@@ -57,20 +56,19 @@ pub fn spawn_next_generation(
     // Create children for each selected entity.
     for (brain, _) in selected {
         for _ in 0..entity_config.child_count {
-            let (brain, body) = spawn_entity(brain.clone(), &mut used_positions, grid_config);
+            let mut genome = brain.genome.clone();
 
-            next_generation.push((brain, body));
+            let roll = rand::random::<f32>();
+
+            if roll < network_config.mutation_rate {
+                flip_random_bit(&mut genome);
+            }
+
+            let brain = Brain::from_genome(genome);
+
+            let entity = spawn_entity(brain, &mut used_positions, grid_config);
+            next_generation.push(entity);
         }
-    }
-
-    // Apply mutations.
-    let num_to_mutate =
-        (next_generation.len() as f32 * network_config.mutation_rate).floor() as usize;
-
-    for (brain, body) in next_generation.iter_mut().take(num_to_mutate) {
-        brain.mutate_connections(network_config);
-        brain.mutate_structure(network_config);
-        body.mutate_color();
     }
 
     // Generate new entities to fill the remaining slots.

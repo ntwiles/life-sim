@@ -45,7 +45,8 @@ impl LifeSim {
         );
 
         for i in 0..4 {
-            write_dot_file(&entities[i].0, i);
+            let (brain, _) = &entities[i];
+            write_dot_file(&brain, i);
         }
 
         Self {
