@@ -3,7 +3,7 @@ use cellular_automata::grid::grid_coords_to_index;
 use crate::{
     body::Body,
     entity_config::EntityConfig,
-    genome::{mutation::flip_random_bit, random_genome},
+    genome::{mutation::mutate_genome, random_genome},
     grid_config::GridConfig,
     neural_network::brain::Brain,
     neural_network_config::NeuralNetworkConfig,
@@ -61,7 +61,7 @@ pub fn spawn_next_generation(
             let roll = rand::random::<f32>();
 
             if roll < network_config.mutation_rate {
-                flip_random_bit(&mut genome);
+                mutate_genome(&mut genome);
             }
 
             let brain = Brain::from_genome(genome);
