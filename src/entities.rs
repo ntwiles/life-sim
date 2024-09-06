@@ -58,11 +58,9 @@ pub fn spawn_next_generation(
         for _ in 0..entity_config.child_count {
             let mut genome = brain.genome.clone();
 
-            // TODO: Confirm that mutations are happening at the rate we think they are.
             let roll = rand::random::<f32>();
 
             if roll < network_config.mutation_rate {
-                println!("Mutating genome");
                 mutate_genome(&mut genome);
             }
 
