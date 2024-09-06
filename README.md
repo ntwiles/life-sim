@@ -13,7 +13,7 @@ the [r] key.
 
 ### Graphviz
 
-A sample of each generation has it's neural network outputted to .dot files in the `/data` directory. Images can be
+A sample of each generation has its neural network written to .dot files in the `/data` directory. Images can be
 generated from these files using [DOT command line](https://graphviz.org/download/) with the following example command:
 
 ```sh
