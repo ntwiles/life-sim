@@ -22,8 +22,8 @@ dot -Tpng ./data/dots/0.dot -o ./data/graphs/0.png
 
 ### Pyplot
 
-A python script in the `./scripts` folder can be used to chart survivorship over time. To use, pipe the simulator stdout
-into the python plotting script:
+A python script in the `./scripts` folder can be used to chart entity survivorship over time. To use it, pipe the simulator
+stdout into the python plotting script:
 
 ```sh
 cargo run | python scripts/plot.py
