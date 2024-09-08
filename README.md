@@ -26,5 +26,5 @@ A python script in the `./scripts` folder can be used to chart entity survivorsh
 stdout into the python plotting script:
 
 ```sh
-cargo run | python scripts/plot.py
+cargo run --release | python scripts/plot.py
 ```

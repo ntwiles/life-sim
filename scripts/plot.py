@@ -50,8 +50,8 @@ def main():
         y_trend.append(trend)
         
         ax.clear()
-        ax.plot(x_data, y_data)
-        ax.plot(x_data, y_trend)
+        ax.plot(x_data, y_data, label="Survival Rate (%)")
+        ax.plot(x_data, y_trend, label="Trend", linestyle='dashed')
         ax.set_xlabel("Generation", color='#cccccc')
         ax.set_ylabel("Survival Rate (%)", color='#cccccc')
         ax.tick_params(axis='x', colors='#cccccc')
@@ -60,7 +60,7 @@ def main():
         ax.legend()
         
         plt.draw()
-        plt.pause(1)
+        plt.pause(.01)
 
 if __name__ == '__main__':
     main()

@@ -73,6 +73,7 @@ pub fn spawn_next_generation(
 
     // Generate new entities to fill the remaining slots.
     let num_remaining = entity_config.start_count - next_generation.len() as u32;
+
     let (next_generation, _) = spawn_entities(
         grid_config,
         network_config,
