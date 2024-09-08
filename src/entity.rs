@@ -55,16 +55,18 @@ pub fn spawn_next_generation(
     grid_config: &GridConfig,
     entity_config: &EntityConfig,
     network_config: &NeuralNetworkConfig,
+    supplement_entities: bool,
+    limit_population: bool,
     mut selected: Vec<&Entity>,
 ) -> Vec<Entity> {
+    if limit_population {
+        let max_population = (entity_config.start_count / entity_config.child_count) as usize;
+        selected.sort_by(|a, b| b.times_eaten.cmp(&a.times_eaten));
+        selected.truncate(max_population);
+    }
+
     let mut next_generation = Vec::<Entity>::new();
     let mut used_positions = Vec::<usize>::new();
-
-    let max_selected = entity_config.start_count / entity_config.child_count;
-
-    selected.sort_by(|a, b| b.times_eaten.cmp(&a.times_eaten));
-
-    let selected = selected.iter().take(max_selected as usize).peekable();
 
     // Create children for each selected entity.
     for Entity { brain, .. } in selected {
@@ -82,6 +84,10 @@ pub fn spawn_next_generation(
             let entity = spawn_entity(brain, &mut used_positions, grid_config);
             next_generation.push(entity);
         }
+    }
+
+    if !supplement_entities {
+        return next_generation;
     }
 
     // Generate new entities to fill the remaining slots.

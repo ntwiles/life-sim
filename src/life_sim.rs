@@ -63,7 +63,11 @@ impl LifeSim {
     }
 
     fn start_new_generation(&mut self) {
-        let selected: Vec<&Entity> = self.entities.iter().filter(|e| e.body.is_alive).collect();
+        let selected: Vec<&Entity> = self
+            .entities
+            .iter()
+            .filter(|e| e.body.is_alive && e.times_eaten > 0)
+            .collect();
 
         println!(
             "Generation {} over. Survivors {}/{} ({:.2}%)",
@@ -77,11 +81,13 @@ impl LifeSim {
             &self.grid_config,
             &self.entity_config,
             &self.network_config,
+            self.scenario.supplement_entities,
+            self.scenario.limit_population,
             selected,
         );
 
-        for i in 0..4 {
-            write_dot_file(&next_generation[i].brain, i);
+        for (i, entity) in next_generation.iter().enumerate().take(4) {
+            write_dot_file(&entity.brain, i);
         }
 
         self.entities = next_generation;
@@ -123,7 +129,7 @@ impl Automata<EntityColors> for LifeSim {
                 continue;
             }
 
-            let food_disp = self
+            let (_, food_disp) = self
                 .scenario
                 .shortest_food_displacement((entity.body.x, entity.body.y));
 

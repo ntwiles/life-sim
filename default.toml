@@ -12,6 +12,6 @@ render_killzone_color = [150, 45, 0, 255]
 render_background_color = [18, 22, 30, 255]
 render_pixel_scale = 6
 
-scenario_starting_food_amount = 1000
+scenario_starting_food_amount = 500
 
 debug = false

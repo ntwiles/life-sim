@@ -18,3 +18,4 @@ rand = "0.8.4"
 serde = { version = "1.0.8", features = ["derive"] }
 strum = "0.23"
 strum_macros = "0.23"
+noise = "0.8.0"

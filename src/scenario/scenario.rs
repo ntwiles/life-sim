@@ -1,5 +1,7 @@
 use cellular_automata::grid::grid_coords_to_index;
 
+use crate::vector_2d::Vector2D;
+
 use super::{food::generate_food, kill_zone::KillZone};
 
 pub struct Scenario {
@@ -8,6 +10,9 @@ pub struct Scenario {
     pub starting_kill_zones: Vec<KillZone>,
     pub remaining_kill_zones: Vec<usize>,
     pub active_kill_zones: Vec<usize>,
+
+    pub supplement_entities: bool,
+    pub limit_population: bool,
 
     starting_food: u32,
     food_map: Vec<bool>,
@@ -23,6 +28,8 @@ impl Scenario {
         starting_food: u32,
         grid_width: u32,
         grid_height: u32,
+        supplement_entities: bool,
+        limit_population: bool,
     ) -> Self {
         let generation_step_count = starting_kill_zones
             .iter()
@@ -46,6 +53,8 @@ impl Scenario {
             starting_food,
             grid_width,
             grid_height,
+            supplement_entities,
+            limit_population,
         }
     }
 
@@ -115,24 +124,28 @@ impl Scenario {
             })
     }
 
-    pub fn shortest_food_displacement(&self, (x, y): (u32, u32)) -> (u32, u32) {
-        let mut min_dx = u32::MAX;
-        let mut min_dy = u32::MAX;
+    pub fn shortest_food_displacement(&self, (x, y): (u32, u32)) -> (f32, (i32, i32)) {
+        let mut min_dist = f32::MAX;
+        let mut min_disp = (0, 0);
 
         for (fx, fy) in &self.food_positions {
-            let dx = if x < *fx { fx - x } else { x - fx };
-            let dy = if y < *fy { fy - y } else { y - fy };
+            let dx = *fx as i32 - x as i32;
+            let dy = *fy as i32 - y as i32;
 
-            if dx < min_dx {
-                min_dx = dx;
-            }
+            let vec = Vector2D {
+                x: *fx as f32 - x as f32,
+                y: *fy as f32 - y as f32,
+            };
 
-            if dy < min_dy {
-                min_dy = dy;
+            let dist = vec.magnitude();
+
+            if dist < min_dist {
+                min_dist = dist;
+                min_disp = (dx, dy);
             }
         }
 
-        (min_dx, min_dy)
+        (min_dist, min_disp)
     }
 
     pub fn is_food_at_point(&self, (x, y): (u32, u32)) -> bool {

@@ -53,62 +53,80 @@ fn main() -> Result<(), Error> {
         mutation_rate: settings.neural_network_mutation_rate,
     };
 
+    // TODO: Find a better way to persist these values, maybe a JSON file?
+    // let kill_zones = vec![
+    //     KillZone {
+    //         start_time: 30,
+    //         end_time: 60,
+    //         position: (120, 0),
+    //         width: 31,
+    //         height: grid_config.height,
+    //     },
+    //     KillZone {
+    //         start_time: 60,
+    //         end_time: 90,
+    //         position: (90, 0),
+    //         width: 31,
+    //         height: grid_config.height,
+    //     },
+    //     KillZone {
+    //         start_time: 90,
+    //         end_time: 120,
+    //         position: (60, 0),
+    //         width: 31,
+    //         height: grid_config.height,
+    //     },
+    //     KillZone {
+    //         start_time: 120,
+    //         end_time: 150,
+    //         position: (30, 0),
+    //         width: 31,
+    //         height: 30,
+    //     },
+    //     KillZone {
+    //         start_time: 120,
+    //         end_time: 150,
+    //         position: (30, 120),
+    //         width: 31,
+    //         height: 30,
+    //     },
+    //     KillZone {
+    //         start_time: 150,
+    //         end_time: 180,
+    //         position: (0, 0),
+    //         width: 31,
+    //         height: 30,
+    //     },
+    //     KillZone {
+    //         start_time: 150,
+    //         end_time: 180,
+    //         position: (0, 120),
+    //         width: 31,
+    //         height: 30,
+    //     },
+    //     KillZone {
+    //         start_time: 180,
+    //         end_time: 210,
+    //         position: (0, 0),
+    //         width: 31,
+    //         height: grid_config.height,
+    //     },
+    // ];
+
     let kill_zones = vec![
         KillZone {
-            start_time: 30,
-            end_time: 60,
-            position: (120, 0),
-            width: 31,
-            height: grid_config.height,
-        },
-        KillZone {
-            start_time: 60,
-            end_time: 90,
-            position: (90, 0),
-            width: 31,
-            height: grid_config.height,
-        },
-        KillZone {
-            start_time: 90,
-            end_time: 120,
-            position: (60, 0),
-            width: 31,
-            height: grid_config.height,
-        },
-        KillZone {
-            start_time: 120,
-            end_time: 150,
-            position: (30, 0),
-            width: 31,
+            start_time: 0,
+            end_time: 300,
+            position: (25, 25),
+            width: 30,
             height: 30,
         },
         KillZone {
-            start_time: 120,
-            end_time: 150,
-            position: (30, 120),
-            width: 31,
-            height: 30,
-        },
-        KillZone {
-            start_time: 150,
-            end_time: 180,
-            position: (0, 0),
-            width: 31,
-            height: 30,
-        },
-        KillZone {
-            start_time: 150,
-            end_time: 180,
-            position: (0, 120),
-            width: 31,
-            height: 30,
-        },
-        KillZone {
-            start_time: 180,
-            end_time: 210,
-            position: (0, 0),
-            width: 31,
-            height: grid_config.height,
+            start_time: 0,
+            end_time: 300,
+            position: (85, 85),
+            width: 40,
+            height: 40,
         },
     ];
 
@@ -119,6 +137,8 @@ fn main() -> Result<(), Error> {
         food_amount,
         grid_config.width,
         grid_config.height,
+        true,
+        false,
     );
 
     let sim = Box::new(LifeSim::new(
