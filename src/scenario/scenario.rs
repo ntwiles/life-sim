@@ -92,41 +92,48 @@ impl Scenario {
                 });
     }
 
-    pub fn shortest_killzone_displacement(&self, (x, y): (u32, u32)) -> (u32, u32) {
-        // TODO: This has a map and a fold and can probably be optimized.
-        self.active_kill_zones
-            .iter()
-            .map(|i| {
-                let kill_zone = &self.starting_kill_zones[*i];
-                let (kx, ky) = kill_zone.position;
-                let (kz_width, kz_height) = (kill_zone.width, kill_zone.height);
+    pub fn shortest_killzone_displacement(&self, (x, y): (u32, u32)) -> (f32, (i32, i32)) {
+        let mut min_dist = f32::MAX;
+        let mut min_disp = (i32::MAX, i32::MAX);
 
-                let dist_x = if x < kx {
-                    kx - x
-                } else if x >= kx + kz_width {
-                    x - (kx + kz_width - 1)
-                } else {
-                    0
-                };
+        for i in &self.active_kill_zones {
+            let kz = &self.starting_kill_zones[*i];
 
-                let dist_y = if y < ky {
-                    ky - y
-                } else if y >= ky + kz_height {
-                    y - (ky + kz_height - 1)
-                } else {
-                    0
-                };
+            let dx: i32 = if x < kz.position.0 {
+                kz.position.0 as i32 - x as i32
+            } else if x >= kz.position.0 + kz.width {
+                (kz.position.0 + kz.width) as i32 - x as i32
+            } else {
+                0
+            };
 
-                (dist_x, dist_y)
-            })
-            .fold((u32::MAX, u32::MAX), |(min_dx, min_dy), (dx, dy)| {
-                (min_dx.min(dx), min_dy.min(dy))
-            })
+            let dy: i32 = if y < kz.position.1 {
+                kz.position.1 as i32 - y as i32
+            } else if y >= kz.position.1 + kz.height {
+                (kz.position.1 + kz.height) as i32 - y as i32
+            } else {
+                0
+            };
+
+            let vec = Vector2D {
+                x: dx as f32,
+                y: dy as f32,
+            };
+
+            let dist = vec.magnitude();
+
+            if dist < min_dist {
+                min_dist = dist;
+                min_disp = (dx, dy);
+            }
+        }
+
+        (min_dist, min_disp)
     }
 
     pub fn shortest_food_displacement(&self, (x, y): (u32, u32)) -> (f32, (i32, i32)) {
         let mut min_dist = f32::MAX;
-        let mut min_disp = (0, 0);
+        let mut min_disp = (i32::MAX, i32::MAX);
 
         for (fx, fy) in &self.food_positions {
             let dx = *fx as i32 - x as i32;

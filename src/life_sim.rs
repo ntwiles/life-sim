@@ -110,7 +110,7 @@ impl Automata<EntityColors> for LifeSim {
                 continue;
             }
 
-            let killzone_disp = self
+            let (killzone_dist, killzone_disp) = self
                 .scenario
                 .shortest_killzone_displacement((entity.body.x, entity.body.y));
 
@@ -119,9 +119,7 @@ impl Automata<EntityColors> for LifeSim {
                 y: killzone_disp.1 as f32,
             };
 
-            let killzone_dist = killzone_dist_xy.magnitude();
             let killzone_dir = killzone_dist_xy.normalize();
-
             let danger_angle = killzone_dir.y.atan2(killzone_dir.x);
 
             if killzone_disp == (0, 0) {
