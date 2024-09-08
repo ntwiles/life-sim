@@ -9,8 +9,8 @@ mod neural_network_config;
 mod render_config;
 mod rendering;
 mod scenario;
+mod services;
 mod settings;
-mod util;
 mod vector_2d;
 
 use cellular_automata::{sim::run_sim, sim_config::SimConfig};
@@ -22,6 +22,7 @@ use neural_network_config::NeuralNetworkConfig;
 use pixels::Error;
 use render_config::RenderConfig;
 use scenario::{kill_zone::KillZone, scenario::Scenario};
+use services::scenarios::load_scenario;
 use settings::Settings;
 
 fn main() -> Result<(), Error> {
@@ -132,14 +133,17 @@ fn main() -> Result<(), Error> {
 
     let food_amount = settings.scenario_starting_food_amount;
 
-    let scenario = Scenario::new(
-        kill_zones,
-        food_amount,
-        grid_config.width,
-        grid_config.height,
-        true,
-        false,
-    );
+    // let scenario = Scenario::new(
+    //     kill_zones,
+    //     food_amount,
+    //     grid_config.width,
+    //     grid_config.height,
+    //     true,
+    //     false,
+    // );
+
+    let scenario_file = load_scenario("buffet").unwrap();
+    let scenario = Scenario::from_file(scenario_file, grid_config.width, grid_config.height);
 
     let sim = Box::new(LifeSim::new(
         scenario,

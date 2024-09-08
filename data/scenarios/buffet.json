@@ -1,0 +1,21 @@
+{
+    "supplementEntities": true,
+    "limitPopulation": false,
+    "startingFood": 1000,
+    "killZones": [
+        {
+            "startTime": 0,
+            "endTime": 300,
+            "position": [25, 25],
+            "width": 30,
+            "height": 30
+        },
+        {
+            "startTime": 0,
+            "endTime": 300,
+            "position": [85, 85],
+            "width": 40,
+            "height": 40
+        }
+    ]
+}

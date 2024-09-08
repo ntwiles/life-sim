@@ -10,7 +10,7 @@ use crate::{
     entity::{spawn_entities, spawn_next_generation, Entity},
     neural_network_config::NeuralNetworkConfig,
     rendering::additive_blend,
-    util::dot::write_dot_file,
+    services::dot::write_dot_file,
 };
 use crate::{grid_config::GridConfig, scenario::scenario::Scenario};
 use crate::{render_config::RenderConfig, vector_2d::Vector2D};

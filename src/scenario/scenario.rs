@@ -1,9 +1,11 @@
 use cellular_automata::grid::grid_coords_to_index;
+use serde::Deserialize;
 
-use crate::vector_2d::Vector2D;
+use crate::{services::scenarios::ScenarioFile, vector_2d::Vector2D};
 
 use super::{food::generate_food, kill_zone::KillZone};
 
+#[derive(Deserialize)]
 pub struct Scenario {
     pub generation_step_count: usize,
 
@@ -23,14 +25,10 @@ pub struct Scenario {
 }
 
 impl Scenario {
-    pub fn new(
-        starting_kill_zones: Vec<KillZone>,
-        starting_food: u32,
-        grid_width: u32,
-        grid_height: u32,
-        supplement_entities: bool,
-        limit_population: bool,
-    ) -> Self {
+    pub fn from_file(config: ScenarioFile, grid_width: u32, grid_height: u32) -> Self {
+        let starting_kill_zones = config.kill_zones;
+        let starting_food = config.starting_food;
+
         let generation_step_count = starting_kill_zones
             .iter()
             .map(|kz| kz.end_time)
@@ -53,8 +51,8 @@ impl Scenario {
             starting_food,
             grid_width,
             grid_height,
-            supplement_entities,
-            limit_population,
+            supplement_entities: config.supplement_entities,
+            limit_population: config.limit_population,
         }
     }
 
