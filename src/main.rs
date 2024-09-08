@@ -21,7 +21,7 @@ use life_sim::LifeSim;
 use neural_network_config::NeuralNetworkConfig;
 use pixels::Error;
 use render_config::RenderConfig;
-use scenario::{kill_zone::KillZone, scenario::Scenario};
+use scenario::scenario::Scenario;
 use services::scenarios::load_scenario;
 use settings::Settings;
 
@@ -53,94 +53,6 @@ fn main() -> Result<(), Error> {
 
         mutation_rate: settings.neural_network_mutation_rate,
     };
-
-    // TODO: Find a better way to persist these values, maybe a JSON file?
-    // let kill_zones = vec![
-    //     KillZone {
-    //         start_time: 30,
-    //         end_time: 60,
-    //         position: (120, 0),
-    //         width: 31,
-    //         height: grid_config.height,
-    //     },
-    //     KillZone {
-    //         start_time: 60,
-    //         end_time: 90,
-    //         position: (90, 0),
-    //         width: 31,
-    //         height: grid_config.height,
-    //     },
-    //     KillZone {
-    //         start_time: 90,
-    //         end_time: 120,
-    //         position: (60, 0),
-    //         width: 31,
-    //         height: grid_config.height,
-    //     },
-    //     KillZone {
-    //         start_time: 120,
-    //         end_time: 150,
-    //         position: (30, 0),
-    //         width: 31,
-    //         height: 30,
-    //     },
-    //     KillZone {
-    //         start_time: 120,
-    //         end_time: 150,
-    //         position: (30, 120),
-    //         width: 31,
-    //         height: 30,
-    //     },
-    //     KillZone {
-    //         start_time: 150,
-    //         end_time: 180,
-    //         position: (0, 0),
-    //         width: 31,
-    //         height: 30,
-    //     },
-    //     KillZone {
-    //         start_time: 150,
-    //         end_time: 180,
-    //         position: (0, 120),
-    //         width: 31,
-    //         height: 30,
-    //     },
-    //     KillZone {
-    //         start_time: 180,
-    //         end_time: 210,
-    //         position: (0, 0),
-    //         width: 31,
-    //         height: grid_config.height,
-    //     },
-    // ];
-
-    let kill_zones = vec![
-        KillZone {
-            start_time: 0,
-            end_time: 300,
-            position: (25, 25),
-            width: 30,
-            height: 30,
-        },
-        KillZone {
-            start_time: 0,
-            end_time: 300,
-            position: (85, 85),
-            width: 40,
-            height: 40,
-        },
-    ];
-
-    let food_amount = settings.scenario_starting_food_amount;
-
-    // let scenario = Scenario::new(
-    //     kill_zones,
-    //     food_amount,
-    //     grid_config.width,
-    //     grid_config.height,
-    //     true,
-    //     false,
-    // );
 
     let scenario_file = load_scenario("buffet").unwrap();
     let scenario = Scenario::from_file(scenario_file, grid_config.width, grid_config.height);
