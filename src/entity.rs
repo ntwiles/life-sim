@@ -86,17 +86,17 @@ pub fn spawn_next_generation(
         }
     }
 
-    if !supplement_entities {
+    // Generate new entities to fill the remaining slots.
+    let num_remaining = entity_config.start_count as i32 - next_generation.len() as i32;
+
+    if !supplement_entities || num_remaining <= 0 {
         return next_generation;
     }
-
-    // Generate new entities to fill the remaining slots.
-    let num_remaining = entity_config.start_count - next_generation.len() as u32;
 
     let (next_generation, _) = spawn_entities(
         grid_config,
         network_config,
-        num_remaining,
+        num_remaining as u32,
         Some((next_generation, used_positions)),
     );
 

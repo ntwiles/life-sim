@@ -110,22 +110,20 @@ impl Automata<EntityColors> for LifeSim {
                 continue;
             }
 
+            if self
+                .scenario
+                .is_point_in_kill_zone((entity.body.x, entity.body.y), self.sim_current_step)
+            {
+                entity.body.is_alive = false;
+                continue;
+            }
+
             let (killzone_dist, killzone_disp) = self
                 .scenario
                 .shortest_killzone_displacement((entity.body.x, entity.body.y));
 
-            let killzone_dist_xy = Vector2D {
-                x: killzone_disp.0 as f32,
-                y: killzone_disp.1 as f32,
-            };
-
-            let killzone_dir = killzone_dist_xy.normalize();
+            let killzone_dir = killzone_disp.normalize();
             let danger_angle = killzone_dir.y.atan2(killzone_dir.x);
-
-            if killzone_disp == (0, 0) {
-                entity.body.is_alive = false;
-                continue;
-            }
 
             let (_, food_disp) = self
                 .scenario

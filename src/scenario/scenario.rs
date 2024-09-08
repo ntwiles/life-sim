@@ -92,9 +92,9 @@ impl Scenario {
                 });
     }
 
-    pub fn shortest_killzone_displacement(&self, (x, y): (u32, u32)) -> (f32, (i32, i32)) {
+    pub fn shortest_killzone_displacement(&self, (x, y): (u32, u32)) -> (f32, Vector2D) {
         let mut min_dist = f32::MAX;
-        let mut min_disp = (i32::MAX, i32::MAX);
+        let mut min_disp = Vector2D { x: 0.0, y: 0.0 };
 
         for i in &self.active_kill_zones {
             let kz = &self.starting_kill_zones[*i];
@@ -115,16 +115,16 @@ impl Scenario {
                 0
             };
 
-            let vec = Vector2D {
+            let disp = Vector2D {
                 x: dx as f32,
                 y: dy as f32,
             };
 
-            let dist = vec.magnitude();
+            let dist = disp.magnitude();
 
             if dist < min_dist {
                 min_dist = dist;
-                min_disp = (dx, dy);
+                min_disp = disp;
             }
         }
 

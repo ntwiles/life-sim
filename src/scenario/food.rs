@@ -34,7 +34,8 @@ pub fn generate_food(
 
     // Clustered distribution
     let noise_scale = 0.05;
-    let threshold = 0.5;
+    // TODO: Why does threshold cause crashes below .5?
+    let threshold = 0.3;
 
     let seed: u32 = rng.gen();
     let perlin = Perlin::new(seed);
