@@ -5,19 +5,18 @@ use cellular_automata::{
     viewport::{viewport_index_to_coords, viewport_to_grid},
 };
 
+use crate::{entity, entity_config::EntityConfig};
 use crate::{
-    body::Body,
-    entities::{spawn_entities, spawn_next_generation},
+    entity::{spawn_entities, spawn_next_generation, Entity},
     neural_network_config::NeuralNetworkConfig,
     rendering::additive_blend,
     util::dot::write_dot_file,
 };
-use crate::{entity_config::EntityConfig, neural_network::brain::Brain};
 use crate::{grid_config::GridConfig, scenario::scenario::Scenario};
 use crate::{render_config::RenderConfig, vector_2d::Vector2D};
 
 pub struct LifeSim {
-    entities: Vec<(Brain, Body)>,
+    entities: Vec<Entity>,
     sim_current_step: usize,
     sim_generation_number: u32,
 
@@ -45,7 +44,7 @@ impl LifeSim {
         );
 
         for i in 0..4 {
-            let (brain, _) = &entities[i];
+            let Entity { brain, .. } = &entities[i];
             write_dot_file(&brain, i);
         }
 
@@ -64,11 +63,7 @@ impl LifeSim {
     }
 
     fn start_new_generation(&mut self) {
-        let selected: Vec<&(Brain, Body)> = self
-            .entities
-            .iter()
-            .filter(|(_, body)| body.is_alive)
-            .collect();
+        let selected: Vec<&Entity> = self.entities.iter().filter(|e| e.body.is_alive).collect();
 
         println!(
             "Generation {} over. Survivors {}/{} ({:.2}%)",
@@ -86,7 +81,7 @@ impl LifeSim {
         );
 
         for i in 0..4 {
-            write_dot_file(&next_generation[i].0, i);
+            write_dot_file(&next_generation[i].brain, i);
         }
 
         self.entities = next_generation;
@@ -104,14 +99,14 @@ impl Automata<EntityColors> for LifeSim {
 
         self.scenario.update(self.sim_current_step);
 
-        for (brain, body) in &mut self.entities {
-            if !body.is_alive {
+        for entity in &mut self.entities {
+            if !entity.body.is_alive {
                 continue;
             }
 
             let killzone_disp = self
                 .scenario
-                .shortest_killzone_displacement((body.x, body.y));
+                .shortest_killzone_displacement((entity.body.x, entity.body.y));
 
             let killzone_dist_xy = Vector2D {
                 x: killzone_disp.0 as f32,
@@ -124,16 +119,24 @@ impl Automata<EntityColors> for LifeSim {
             let danger_angle = killzone_dir.y.atan2(killzone_dir.x);
 
             if killzone_disp == (0, 0) {
-                body.is_alive = false;
-            } else {
-                let decision = brain.decide(
-                    generation_time,
-                    killzone_dist,
-                    danger_angle.sin(),
-                    danger_angle.cos(),
-                );
-                body.update(decision, &self.grid_config);
+                entity.body.is_alive = false;
+                continue;
             }
+
+            let pos = (entity.body.x as u32, entity.body.y as u32);
+
+            if self.scenario.is_food_at_point(pos) {
+                entity.times_eaten += 1;
+            }
+
+            let decision = entity.brain.decide(
+                generation_time,
+                killzone_dist,
+                danger_angle.sin(),
+                danger_angle.cos(),
+            );
+
+            entity.body.update(decision, &self.grid_config);
         }
 
         if self.sim_current_step >= self.scenario.generation_step_count {
@@ -146,11 +149,12 @@ impl Automata<EntityColors> for LifeSim {
 
     // This whole render context dependency injection thing may not be what we want. It might be better to just
     // save state in the automata and have the render function access it directly.
+    // This also uses a filter + map, we should fold instead.
     fn before_render(&self) -> EntityColors {
         self.entities
             .iter()
-            .filter(|(_, body)| body.is_alive)
-            .map(|(_, body)| ((body.x, body.y), body.color_gradient_index))
+            .filter(|e| e.body.is_alive)
+            .map(|e| ((e.body.x, e.body.y), e.body.color_gradient_index))
             .collect()
     }
 
@@ -164,10 +168,9 @@ impl Automata<EntityColors> for LifeSim {
         let (x, y) = viewport_to_grid(vx, vy, self.render_config.pixel_scale);
 
         let color: [u8; 4] = if entity_colors.contains_key(&(x, y)) {
-            self.render_config
-                .color_gradient
-                .at(entity_colors[&(x, y)])
-                .to_rgba8()
+            [0, 140, 200, 255]
+        } else if self.scenario.is_food_at_point((x, y)) {
+            [20, 200, 0, 255]
         } else {
             self.render_config.background_color
         };

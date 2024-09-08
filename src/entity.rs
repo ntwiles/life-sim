@@ -9,17 +9,28 @@ use crate::{
     neural_network_config::NeuralNetworkConfig,
 };
 
+pub struct Entity {
+    pub brain: Brain,
+    pub body: Body,
+    pub times_eaten: u32,
+}
+
 fn spawn_entity(
     brain: Brain,
     occupied_positions: &mut Vec<usize>,
     grid_config: &GridConfig,
-) -> (Brain, Body) {
+) -> Entity {
     let (x, y) = get_random_position(occupied_positions, grid_config.width, grid_config.height);
     let body = Body::new(x, y, rand::random::<f64>());
-    (brain, body)
+
+    Entity {
+        brain,
+        body,
+        times_eaten: 0,
+    }
 }
 
-type SpawnedEntities = (Vec<(Brain, Body)>, Vec<usize>);
+type SpawnedEntities = (Vec<Entity>, Vec<usize>);
 
 pub fn spawn_entities(
     grid_config: &GridConfig,
@@ -31,10 +42,9 @@ pub fn spawn_entities(
 
     for _ in 0..num_entities {
         let genome = random_genome(network_config);
-        let (brain, body) =
-            spawn_entity(Brain::from_genome(genome), &mut used_positions, grid_config);
+        let entity = spawn_entity(Brain::from_genome(genome), &mut used_positions, grid_config);
 
-        entities.push((brain, body));
+        entities.push(entity);
     }
 
     (entities, used_positions)
@@ -45,16 +55,16 @@ pub fn spawn_next_generation(
     entity_config: &EntityConfig,
     network_config: &NeuralNetworkConfig,
 
-    selected: Vec<&(Brain, Body)>,
-) -> Vec<(Brain, Body)> {
-    let mut next_generation = Vec::<(Brain, Body)>::new();
+    selected: Vec<&Entity>,
+) -> Vec<Entity> {
+    let mut next_generation = Vec::<Entity>::new();
     let mut used_positions = Vec::<usize>::new();
 
     let max_selected = entity_config.start_count / entity_config.child_count;
     let selected = selected.iter().take(max_selected as usize);
 
     // Create children for each selected entity.
-    for (brain, _) in selected {
+    for Entity { brain, .. } in selected {
         for _ in 0..entity_config.child_count {
             let mut genome = brain.genome.clone();
 

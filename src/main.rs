@@ -1,5 +1,5 @@
 mod body;
-mod entities;
+mod entity;
 mod entity_config;
 mod genome;
 mod grid_config;
@@ -112,7 +112,7 @@ fn main() -> Result<(), Error> {
         },
     ];
 
-    let scenario = Scenario::new(kill_zones);
+    let scenario = Scenario::new(kill_zones, grid_config.width, grid_config.height);
 
     let sim = Box::new(LifeSim::new(
         scenario,

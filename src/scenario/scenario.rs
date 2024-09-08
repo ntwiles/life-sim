@@ -1,4 +1,6 @@
-use super::kill_zone::KillZone;
+use cellular_automata::grid::grid_coords_to_index;
+
+use super::{food::generate_food, kill_zone::KillZone};
 
 pub struct Scenario {
     pub generation_step_count: usize,
@@ -6,27 +8,44 @@ pub struct Scenario {
     pub starting_kill_zones: Vec<KillZone>,
     pub remaining_kill_zones: Vec<usize>,
     pub active_kill_zones: Vec<usize>,
+
+    starting_food: u32,
+    food: Vec<bool>,
+
+    grid_width: u32,
+    grid_height: u32,
 }
 
 impl Scenario {
-    pub fn new(starting_kill_zones: Vec<KillZone>) -> Self {
+    pub fn new(starting_kill_zones: Vec<KillZone>, grid_width: u32, grid_height: u32) -> Self {
         let generation_step_count = starting_kill_zones
             .iter()
             .map(|kz| kz.end_time)
             .max()
             .unwrap();
 
+        let starting_food = 100;
+        let food = generate_food((grid_width * grid_height) as usize, starting_food);
+
         Self {
             generation_step_count,
             remaining_kill_zones: (0..starting_kill_zones.len()).collect(),
             starting_kill_zones,
             active_kill_zones: Vec::new(),
+            food,
+            starting_food,
+            grid_width,
+            grid_height,
         }
     }
 
     pub fn reset(&mut self) {
         self.remaining_kill_zones = (0..self.starting_kill_zones.len()).collect();
         self.active_kill_zones = Vec::new();
+        self.food = generate_food(
+            (self.grid_width * self.grid_height) as usize,
+            self.starting_food,
+        );
     }
 
     pub fn update(&mut self, current_step: usize) {
@@ -79,6 +98,11 @@ impl Scenario {
             .fold((u32::MAX, u32::MAX), |(min_dx, min_dy), (dx, dy)| {
                 (min_dx.min(dx), min_dy.min(dy))
             })
+    }
+
+    pub fn is_food_at_point(&self, (x, y): (u32, u32)) -> bool {
+        let index = grid_coords_to_index(x, y, self.grid_width);
+        self.food[index]
     }
 
     pub fn is_point_in_kill_zone(&self, (x, y): (u32, u32), generation_time: usize) -> bool {
