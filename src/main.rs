@@ -112,7 +112,14 @@ fn main() -> Result<(), Error> {
         },
     ];
 
-    let scenario = Scenario::new(kill_zones, grid_config.width, grid_config.height);
+    let food_amount = settings.scenario_starting_food_amount;
+
+    let scenario = Scenario::new(
+        kill_zones,
+        food_amount,
+        grid_config.width,
+        grid_config.height,
+    );
 
     let sim = Box::new(LifeSim::new(
         scenario,

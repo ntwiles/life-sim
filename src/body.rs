@@ -2,6 +2,7 @@ use crate::grid_config::GridConfig;
 
 use super::neural_network::output_neuron::OutputNeuron;
 
+#[derive(Debug)]
 pub struct Body {
     pub x: u32,
     pub y: u32,

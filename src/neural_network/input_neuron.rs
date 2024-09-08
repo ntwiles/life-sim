@@ -11,6 +11,8 @@ pub enum InputNeuron {
     DangerDist,
     DangerDirSin,
     DangerDirCos,
+    FoodDirSin,
+    FoodDirCos,
 }
 
 impl InputNeuron {
@@ -25,6 +27,8 @@ impl InputNeuron {
             4 => InputNeuron::DangerDist,
             5 => InputNeuron::DangerDirSin,
             6 => InputNeuron::DangerDirCos,
+            7 => InputNeuron::FoodDirSin,
+            8 => InputNeuron::FoodDirCos,
             _ => panic!("Invalid discriminant for InputNeuron: {}", discriminant),
         }
     }
@@ -38,6 +42,8 @@ impl InputNeuron {
             InputNeuron::DangerDist => 4,
             InputNeuron::DangerDirSin => 5,
             InputNeuron::DangerDirCos => 6,
+            InputNeuron::FoodDirSin => 7,
+            InputNeuron::FoodDirCos => 8,
         }
     }
 }
@@ -52,6 +58,8 @@ impl fmt::Display for InputNeuron {
             InputNeuron::DangerDist => write!(f, "DangerDist"),
             InputNeuron::DangerDirSin => write!(f, "DangerDirSin"),
             InputNeuron::DangerDirCos => write!(f, "DangerDirCos"),
+            InputNeuron::FoodDirSin => write!(f, "FoodDirSin"),
+            InputNeuron::FoodDirCos => write!(f, "FoodDirCos"),
         }
     }
 }

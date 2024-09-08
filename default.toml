@@ -1,5 +1,5 @@
 entity_child_count = 2
-entity_start_count = 3000
+entity_start_count = 500
 
 grid_width = 150
 grid_height = 150
@@ -11,5 +11,7 @@ neural_network_mutation_rate = 0.001
 render_killzone_color = [150, 45, 0, 255]
 render_background_color = [18, 22, 30, 255]
 render_pixel_scale = 6
+
+scenario_starting_food_amount = 1000
 
 debug = false

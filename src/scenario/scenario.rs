@@ -10,29 +10,39 @@ pub struct Scenario {
     pub active_kill_zones: Vec<usize>,
 
     starting_food: u32,
-    food: Vec<bool>,
+    food_map: Vec<bool>,
+    food_positions: Vec<(u32, u32)>,
 
     grid_width: u32,
     grid_height: u32,
 }
 
 impl Scenario {
-    pub fn new(starting_kill_zones: Vec<KillZone>, grid_width: u32, grid_height: u32) -> Self {
+    pub fn new(
+        starting_kill_zones: Vec<KillZone>,
+        starting_food: u32,
+        grid_width: u32,
+        grid_height: u32,
+    ) -> Self {
         let generation_step_count = starting_kill_zones
             .iter()
             .map(|kz| kz.end_time)
             .max()
             .unwrap();
 
-        let starting_food = 100;
-        let food = generate_food((grid_width * grid_height) as usize, starting_food);
+        let (food_map, food_positions) = generate_food(
+            grid_width as usize,
+            grid_height as usize,
+            starting_food as usize,
+        );
 
         Self {
             generation_step_count,
             remaining_kill_zones: (0..starting_kill_zones.len()).collect(),
             starting_kill_zones,
             active_kill_zones: Vec::new(),
-            food,
+            food_map,
+            food_positions,
             starting_food,
             grid_width,
             grid_height,
@@ -42,10 +52,15 @@ impl Scenario {
     pub fn reset(&mut self) {
         self.remaining_kill_zones = (0..self.starting_kill_zones.len()).collect();
         self.active_kill_zones = Vec::new();
-        self.food = generate_food(
-            (self.grid_width * self.grid_height) as usize,
-            self.starting_food,
+
+        let (food_map, food_positions) = generate_food(
+            self.grid_width as usize,
+            self.grid_height as usize,
+            self.starting_food as usize,
         );
+
+        self.food_map = food_map;
+        self.food_positions = food_positions;
     }
 
     pub fn update(&mut self, current_step: usize) {
@@ -100,14 +115,35 @@ impl Scenario {
             })
     }
 
+    pub fn shortest_food_displacement(&self, (x, y): (u32, u32)) -> (u32, u32) {
+        let mut min_dx = u32::MAX;
+        let mut min_dy = u32::MAX;
+
+        for (fx, fy) in &self.food_positions {
+            let dx = if x < *fx { fx - x } else { x - fx };
+            let dy = if y < *fy { fy - y } else { y - fy };
+
+            if dx < min_dx {
+                min_dx = dx;
+            }
+
+            if dy < min_dy {
+                min_dy = dy;
+            }
+        }
+
+        (min_dx, min_dy)
+    }
+
     pub fn is_food_at_point(&self, (x, y): (u32, u32)) -> bool {
         let index = grid_coords_to_index(x, y, self.grid_width);
-        self.food[index]
+        self.food_map[index]
     }
 
     pub fn consume_food_at_point(&mut self, (x, y): (u32, u32)) {
         let index = grid_coords_to_index(x, y, self.grid_width);
-        self.food[index] = false;
+        self.food_map[index] = false;
+        self.food_positions.retain(|&(fx, fy)| fx != x || fy != y);
     }
 
     pub fn is_point_in_kill_zone(&self, (x, y): (u32, u32), generation_time: usize) -> bool {

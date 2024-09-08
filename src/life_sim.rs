@@ -5,7 +5,7 @@ use cellular_automata::{
     viewport::{viewport_index_to_coords, viewport_to_grid},
 };
 
-use crate::{entity, entity_config::EntityConfig};
+use crate::entity_config::EntityConfig;
 use crate::{
     entity::{spawn_entities, spawn_next_generation, Entity},
     neural_network_config::NeuralNetworkConfig,
@@ -123,8 +123,19 @@ impl Automata<EntityColors> for LifeSim {
                 continue;
             }
 
-            let pos = (entity.body.x as u32, entity.body.y as u32);
+            let food_disp = self
+                .scenario
+                .shortest_food_displacement((entity.body.x, entity.body.y));
 
+            let food_dist_xy = Vector2D {
+                x: food_disp.0 as f32,
+                y: food_disp.1 as f32,
+            };
+
+            let food_dir = food_dist_xy.normalize();
+            let food_angle = food_dir.y.atan2(food_dir.x);
+
+            let pos = (entity.body.x as u32, entity.body.y as u32);
             if self.scenario.is_food_at_point(pos) {
                 self.scenario.consume_food_at_point(pos);
                 entity.times_eaten += 1;
@@ -135,6 +146,8 @@ impl Automata<EntityColors> for LifeSim {
                 killzone_dist,
                 danger_angle.sin(),
                 danger_angle.cos(),
+                food_angle.sin(),
+                food_angle.cos(),
             );
 
             entity.body.update(decision, &self.grid_config);
@@ -150,13 +163,19 @@ impl Automata<EntityColors> for LifeSim {
 
     // This whole render context dependency injection thing may not be what we want. It might be better to just
     // save state in the automata and have the render function access it directly.
-    // This also uses a filter + map, we should fold instead.
     fn before_render(&self) -> EntityColors {
-        self.entities
-            .iter()
-            .filter(|e| e.body.is_alive)
-            .map(|e| ((e.body.x, e.body.y), e.body.color_gradient_index))
-            .collect()
+        let mut entity_colors = HashMap::new();
+
+        for entity in &self.entities {
+            if entity.body.is_alive {
+                entity_colors.insert(
+                    (entity.body.x as u32, entity.body.y as u32),
+                    entity.body.color_gradient_index,
+                );
+            }
+        }
+
+        entity_colors
     }
 
     fn render(&self, entity_colors: &EntityColors, i: usize, pixel: &mut [u8]) {

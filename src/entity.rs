@@ -9,6 +9,7 @@ use crate::{
     neural_network_config::NeuralNetworkConfig,
 };
 
+#[derive(Debug)]
 pub struct Entity {
     pub brain: Brain,
     pub body: Body,
@@ -54,14 +55,16 @@ pub fn spawn_next_generation(
     grid_config: &GridConfig,
     entity_config: &EntityConfig,
     network_config: &NeuralNetworkConfig,
-
-    selected: Vec<&Entity>,
+    mut selected: Vec<&Entity>,
 ) -> Vec<Entity> {
     let mut next_generation = Vec::<Entity>::new();
     let mut used_positions = Vec::<usize>::new();
 
     let max_selected = entity_config.start_count / entity_config.child_count;
-    let selected = selected.iter().take(max_selected as usize);
+
+    selected.sort_by(|a, b| b.times_eaten.cmp(&a.times_eaten));
+
+    let selected = selected.iter().take(max_selected as usize).peekable();
 
     // Create children for each selected entity.
     for Entity { brain, .. } in selected {

@@ -122,6 +122,8 @@ impl Brain {
         danger_dist: f32,
         danger_dir_sin: f32,
         danger_dir_cos: f32,
+        food_dir_sin: f32,
+        food_dir_cos: f32,
     ) -> OutputNeuron {
         let mut signals = vec![0.0; self.neurons.len()];
 
@@ -152,6 +154,8 @@ impl Brain {
                     InputNeuron::DangerDist => danger_dist,
                     InputNeuron::DangerDirCos => danger_dir_cos,
                     InputNeuron::DangerDirSin => danger_dir_sin,
+                    InputNeuron::FoodDirCos => food_dir_cos,
+                    InputNeuron::FoodDirSin => food_dir_sin,
                 },
                 _ => panic!("Input layer should only contain input neurons."),
             };

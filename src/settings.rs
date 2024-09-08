@@ -23,6 +23,8 @@ pub struct Settings {
     pub render_background_color: [u8; 4],
     pub render_pixel_scale: u32,
 
+    pub scenario_starting_food_amount: u32,
+
     pub debug: bool,
 }
 
