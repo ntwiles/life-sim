@@ -1,25 +1,28 @@
 { 
+    "supplementEntities": true,
+    "limitPopulation": true,
+    "startingFood": 1000,
     "killZones": [
-               {
+        {
             "startTime": 30,
             "endTime": 60,
             "position": [120, 0],
             "width": 31,
-            "height": "grid_config.height"
+            "height": 150
         },
         {
             "startTime": 60,
             "endTime": 90,
             "position": [90, 0],
             "width": 31,
-            "height": "grid_config.height"
+            "height": 150
         },
         {
             "startTime": 90,
             "endTime": 120,
             "position": [60, 0],
             "width": 31,
-            "height": "grid_config.height"
+            "height": 150
         },
         {
             "startTime": 120,
@@ -54,7 +57,7 @@
             "endTime": 210,
             "position": [0, 0],
             "width": 31,
-            "height": "grid_config.height"
+            "height": 150
         }
     ]
 }
