@@ -105,6 +105,11 @@ impl Scenario {
         self.food[index]
     }
 
+    pub fn consume_food_at_point(&mut self, (x, y): (u32, u32)) {
+        let index = grid_coords_to_index(x, y, self.grid_width);
+        self.food[index] = false;
+    }
+
     pub fn is_point_in_kill_zone(&self, (x, y): (u32, u32), generation_time: usize) -> bool {
         self.active_kill_zones.iter().any(|i| {
             let kz = &self.starting_kill_zones[*i];

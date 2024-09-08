@@ -126,6 +126,7 @@ impl Automata<EntityColors> for LifeSim {
             let pos = (entity.body.x as u32, entity.body.y as u32);
 
             if self.scenario.is_food_at_point(pos) {
+                self.scenario.consume_food_at_point(pos);
                 entity.times_eaten += 1;
             }
 
