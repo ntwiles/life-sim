@@ -13,7 +13,7 @@ pub struct Scenario {
     pub remaining_kill_zones: Vec<usize>,
     pub active_kill_zones: Vec<usize>,
 
-    pub supplement_entities: bool,
+    pub supplement_population: bool,
     pub limit_population: bool,
 
     starting_food: u32,
@@ -51,7 +51,7 @@ impl Scenario {
             starting_food,
             grid_width,
             grid_height,
-            supplement_entities: config.supplement_entities,
+            supplement_population: config.supplement_population,
             limit_population: config.limit_population,
         }
     }

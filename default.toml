@@ -1,5 +1,6 @@
+# TODO: Move these to scenario
 entity_child_count = 2
-entity_start_count = 500
+entity_start_count = 3000
 
 grid_width = 150
 grid_height = 150

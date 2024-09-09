@@ -1,5 +1,5 @@
 {
-    "supplementEntities": true,
+    "supplementPopulation": true,
     "limitPopulation": false,
     "startingFood": 1000,
     "killZones": [

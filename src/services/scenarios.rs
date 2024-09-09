@@ -8,7 +8,7 @@ use crate::scenario::kill_zone::KillZone;
 pub struct ScenarioFile {
     pub kill_zones: Vec<KillZone>,
 
-    pub supplement_entities: bool,
+    pub supplement_population: bool,
     pub limit_population: bool,
 
     pub starting_food: u32,

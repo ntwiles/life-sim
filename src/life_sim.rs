@@ -81,7 +81,7 @@ impl LifeSim {
             &self.grid_config,
             &self.entity_config,
             &self.network_config,
-            self.scenario.supplement_entities,
+            self.scenario.supplement_population,
             self.scenario.limit_population,
             selected,
         );

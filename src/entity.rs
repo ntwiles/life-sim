@@ -55,7 +55,7 @@ pub fn spawn_next_generation(
     grid_config: &GridConfig,
     entity_config: &EntityConfig,
     network_config: &NeuralNetworkConfig,
-    supplement_entities: bool,
+    supplement_population: bool,
     limit_population: bool,
     mut selected: Vec<&Entity>,
 ) -> Vec<Entity> {
@@ -89,7 +89,7 @@ pub fn spawn_next_generation(
     // Generate new entities to fill the remaining slots.
     let num_remaining = entity_config.start_count as i32 - next_generation.len() as i32;
 
-    if !supplement_entities || num_remaining <= 0 {
+    if !supplement_population || num_remaining <= 0 {
         return next_generation;
     }
 
