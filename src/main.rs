@@ -9,6 +9,7 @@ mod neural_network_config;
 mod render_config;
 mod rendering;
 mod scenario;
+mod selection;
 mod services;
 mod settings;
 mod vector_2d;
@@ -39,6 +40,7 @@ fn main() -> Result<(), Error> {
     let entity_config = EntityConfig {
         child_count: settings.entity_child_count,
         start_count: settings.entity_start_count,
+        survivor_breed_rate: settings.entity_survivor_breed_rate,
     };
 
     let grid_config = GridConfig {
@@ -53,7 +55,7 @@ fn main() -> Result<(), Error> {
         mutation_rate: settings.neural_network_mutation_rate,
     };
 
-    let scenario_file = load_scenario("buffet").unwrap();
+    let scenario_file = load_scenario("wave").unwrap();
     let scenario = Scenario::from_file(scenario_file, grid_config.width, grid_config.height);
 
     let sim = Box::new(LifeSim::new(

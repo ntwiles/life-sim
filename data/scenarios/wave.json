@@ -1,6 +1,6 @@
 {
   "supplementPopulation": true,
-  "limitPopulation": true,
+  "limitPopulation": false,
 
   "food": null,
   "radiation": {

@@ -6,7 +6,7 @@ use super::neural_network::output_neuron::OutputNeuron;
 pub struct Body {
     pub x: u32,
     pub y: u32,
-    pub is_alive: bool,
+    pub is_alive: bool, // currently used only for radiation.
     pub color_gradient_index: f64,
 }
 

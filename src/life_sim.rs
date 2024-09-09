@@ -1,17 +1,18 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, mem};
 
 use cellular_automata::{
     automata::Automata,
     viewport::{viewport_index_to_coords, viewport_to_grid},
 };
 
-use crate::entity_config::EntityConfig;
 use crate::{
     entity::{spawn_entities, spawn_next_generation, Entity},
     neural_network_config::NeuralNetworkConfig,
     rendering::additive_blend,
+    selection::select_breeders,
     services::dot::write_dot_file,
 };
+use crate::{entity_config::EntityConfig, selection::select_survivors};
 use crate::{grid_config::GridConfig, scenario::scenario::Scenario};
 use crate::{render_config::RenderConfig, vector_2d::Vector2D};
 
@@ -62,33 +63,18 @@ impl LifeSim {
         }
     }
 
-    fn selection_filter(entity: &&Entity, scenario: &Scenario) -> bool {
-        if let Some(food) = &scenario.food {
-            let food_selection = if food.cull_for_starvation {
-                entity.times_eaten > 0
-            } else {
-                true
-            };
-
-            entity.body.is_alive && food_selection
-        } else {
-            entity.body.is_alive
-        }
-    }
-
     fn start_new_generation(&mut self) {
-        let selected: Vec<&Entity> = self
-            .entities
-            .iter()
-            .filter(|e| Self::selection_filter(e, &self.scenario))
-            .collect();
+        let num_starting_entities = self.entities.len() as u32;
+        let entities = mem::take(&mut self.entities);
+        let survivors = select_survivors(&self.scenario, entities);
+        let breeders = select_breeders(&self.scenario, &self.entity_config, survivors);
 
         println!(
-            "Generation {} over. Survivors {}/{} ({:.2}%)",
+            "Generation {} over. Breeders {}/{} ({:.2}%)",
             self.sim_generation_number,
-            selected.len(),
-            self.entities.len(),
-            selected.len() as f32 / self.entities.len() as f32 * 100.0
+            breeders.len(),
+            num_starting_entities,
+            breeders.len() as f32 / num_starting_entities as f32 * 100.0
         );
 
         let next_generation = spawn_next_generation(
@@ -97,7 +83,7 @@ impl LifeSim {
             &self.network_config,
             self.scenario.supplement_population,
             self.scenario.limit_population,
-            selected,
+            breeders,
         );
 
         for (i, entity) in next_generation.iter().enumerate().take(4) {

@@ -59,7 +59,7 @@ pub fn spawn_next_generation(
     network_config: &NeuralNetworkConfig,
     supplement_population: bool,
     limit_population: bool,
-    mut selected: Vec<&Entity>,
+    mut selected: Vec<Entity>,
 ) -> Vec<Entity> {
     if limit_population {
         let max_population = (entity_config.start_count / entity_config.child_count) as usize;
