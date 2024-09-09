@@ -9,6 +9,12 @@ This uses a [cellular autamata framework](https://github.com/ntwiles/cellular-au
 can be paused or resumed using the [space] key, and rendering can be (for better performance) enabled or disabled with
 the [r] key.
 
+## Usage
+
+- (Optional) create a scenario. Examples are found in `./data/scenarios`.
+- Choose a scenario (currently by changing the `load_scenario` hardcoded value in `main.rs`).
+- Run the simulation with `cargo run --release`.
+
 ## Tools
 
 ### Graphviz
