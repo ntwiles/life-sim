@@ -1,63 +1,63 @@
-{ 
-    "supplementPopulation": true,
-    "limitPopulation": true,
-    "startingFood": 1000,
-    "killZones": [
-        {
-            "startTime": 30,
-            "endTime": 60,
-            "position": [120, 0],
-            "width": 31,
-            "height": 150
-        },
-        {
-            "startTime": 60,
-            "endTime": 90,
-            "position": [90, 0],
-            "width": 31,
-            "height": 150
-        },
-        {
-            "startTime": 90,
-            "endTime": 120,
-            "position": [60, 0],
-            "width": 31,
-            "height": 150
-        },
-        {
-            "startTime": 120,
-            "endTime": 150,
-            "position": [30, 0],
-            "width": 31,
-            "height": 30
-        },
-        {
-            "startTime": 120,
-            "endTime": 150,
-            "position": [30, 120],
-            "width": 31,
-            "height": 30
-        },
-        {
-            "startTime": 150,
-            "endTime": 180,
-            "position": [0, 0],
-            "width": 31,
-            "height": 30
-        },
-        {
-            "startTime": 150,
-            "endTime": 180,
-            "position": [0, 120],
-            "width": 31,
-            "height": 30
-        },
-        {
-            "startTime": 180,
-            "endTime": 210,
-            "position": [0, 0],
-            "width": 31,
-            "height": 150
-        }
-    ]
+{
+  "supplementPopulation": true,
+  "limitPopulation": true,
+  "food": null,
+  "killZones": [
+    {
+      "startTime": 30,
+      "endTime": 60,
+      "position": [120, 0],
+      "width": 31,
+      "height": 150
+    },
+    {
+      "startTime": 60,
+      "endTime": 90,
+      "position": [90, 0],
+      "width": 31,
+      "height": 150
+    },
+    {
+      "startTime": 90,
+      "endTime": 120,
+      "position": [60, 0],
+      "width": 31,
+      "height": 150
+    },
+    {
+      "startTime": 120,
+      "endTime": 150,
+      "position": [30, 0],
+      "width": 31,
+      "height": 30
+    },
+    {
+      "startTime": 120,
+      "endTime": 150,
+      "position": [30, 120],
+      "width": 31,
+      "height": 30
+    },
+    {
+      "startTime": 150,
+      "endTime": 180,
+      "position": [0, 0],
+      "width": 31,
+      "height": 30
+    },
+    {
+      "startTime": 150,
+      "endTime": 180,
+      "position": [0, 120],
+      "width": 31,
+      "height": 30
+    },
+    {
+      "startTime": 180,
+      "endTime": 210,
+      "position": [0, 0],
+      "width": 31,
+      "height": 150
+    }
+  ]
 }

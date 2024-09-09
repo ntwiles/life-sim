@@ -1,6 +1,16 @@
 use cellular_automata::grid::grid_coords_to_index;
 use noise::{NoiseFn, Perlin};
 use rand::Rng;
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+pub struct ScenarioFood {
+    pub starting_food: u32,
+    pub cull_for_starvation: bool,
+
+    pub food_map: Vec<bool>,
+    pub food_positions: Vec<(u32, u32)>,
+}
 
 pub fn generate_food(
     grid_width: usize,
@@ -18,6 +28,7 @@ pub fn generate_food(
         food_map.push(false);
     }
 
+    // TODO: Make the distribution configurable.
     // Random distribution
     // for _ in 0..starting_food {
     //     let mut idx = rand::random::<usize>() % grid_size;

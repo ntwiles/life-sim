@@ -5,13 +5,20 @@ use crate::scenario::kill_zone::KillZone;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct FoodFile {
+    pub starting_food: u32,
+    pub cull_for_starvation: bool,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ScenarioFile {
     pub kill_zones: Vec<KillZone>,
 
     pub supplement_population: bool,
     pub limit_population: bool,
 
-    pub starting_food: u32,
+    pub food: Option<FoodFile>,
 }
 
 pub fn load_scenario(scenario_name: &str) -> Result<ScenarioFile, Error> {

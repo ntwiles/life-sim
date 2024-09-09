@@ -3,7 +3,10 @@ use serde::Deserialize;
 
 use crate::{services::scenarios::ScenarioFile, vector_2d::Vector2D};
 
-use super::{food::generate_food, kill_zone::KillZone};
+use super::{
+    food::{generate_food, ScenarioFood},
+    kill_zone::KillZone,
+};
 
 #[derive(Deserialize)]
 pub struct Scenario {
@@ -16,9 +19,7 @@ pub struct Scenario {
     pub supplement_population: bool,
     pub limit_population: bool,
 
-    starting_food: u32,
-    food_map: Vec<bool>,
-    food_positions: Vec<(u32, u32)>,
+    pub food: Option<ScenarioFood>,
 
     grid_width: u32,
     grid_height: u32,
@@ -27,7 +28,6 @@ pub struct Scenario {
 impl Scenario {
     pub fn from_file(config: ScenarioFile, grid_width: u32, grid_height: u32) -> Self {
         let starting_kill_zones = config.kill_zones;
-        let starting_food = config.starting_food;
 
         let generation_step_count = starting_kill_zones
             .iter()
@@ -35,20 +35,29 @@ impl Scenario {
             .max()
             .unwrap();
 
-        let (food_map, food_positions) = generate_food(
-            grid_width as usize,
-            grid_height as usize,
-            starting_food as usize,
-        );
+        let food = if let Some(food_config) = config.food {
+            let (food_map, food_positions) = generate_food(
+                grid_width as usize,
+                grid_height as usize,
+                food_config.starting_food as usize,
+            );
+
+            Some(ScenarioFood {
+                starting_food: food_config.starting_food,
+                cull_for_starvation: food_config.cull_for_starvation,
+                food_map,
+                food_positions,
+            })
+        } else {
+            None
+        };
 
         Self {
             generation_step_count,
             remaining_kill_zones: (0..starting_kill_zones.len()).collect(),
             starting_kill_zones,
             active_kill_zones: Vec::new(),
-            food_map,
-            food_positions,
-            starting_food,
+            food,
             grid_width,
             grid_height,
             supplement_population: config.supplement_population,
@@ -60,14 +69,16 @@ impl Scenario {
         self.remaining_kill_zones = (0..self.starting_kill_zones.len()).collect();
         self.active_kill_zones = Vec::new();
 
-        let (food_map, food_positions) = generate_food(
-            self.grid_width as usize,
-            self.grid_height as usize,
-            self.starting_food as usize,
-        );
+        if let Some(food) = &mut self.food {
+            let (food_map, food_positions) = generate_food(
+                self.grid_width as usize,
+                self.grid_height as usize,
+                food.starting_food as usize,
+            );
 
-        self.food_map = food_map;
-        self.food_positions = food_positions;
+            food.food_map = food_map;
+            food.food_positions = food_positions;
+        }
     }
 
     pub fn update(&mut self, current_step: usize) {
@@ -133,7 +144,9 @@ impl Scenario {
         let mut min_dist = f32::MAX;
         let mut min_disp = (i32::MAX, i32::MAX);
 
-        for (fx, fy) in &self.food_positions {
+        let food = self.food.as_ref().unwrap();
+
+        for (fx, fy) in &food.food_positions {
             let dx = *fx as i32 - x as i32;
             let dy = *fy as i32 - y as i32;
 
@@ -155,13 +168,14 @@ impl Scenario {
 
     pub fn is_food_at_point(&self, (x, y): (u32, u32)) -> bool {
         let index = grid_coords_to_index(x, y, self.grid_width);
-        self.food_map[index]
+        self.food.as_ref().unwrap().food_map[index]
     }
 
     pub fn consume_food_at_point(&mut self, (x, y): (u32, u32)) {
         let index = grid_coords_to_index(x, y, self.grid_width);
-        self.food_map[index] = false;
-        self.food_positions.retain(|&(fx, fy)| fx != x || fy != y);
+        let food = self.food.as_mut().unwrap();
+        food.food_map[index] = false;
+        food.food_positions.retain(|&(fx, fy)| fx != x || fy != y);
     }
 
     pub fn is_point_in_kill_zone(&self, (x, y): (u32, u32), generation_time: usize) -> bool {

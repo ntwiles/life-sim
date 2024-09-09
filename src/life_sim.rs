@@ -62,11 +62,25 @@ impl LifeSim {
         }
     }
 
+    fn selection_filter(entity: &&Entity, scenario: &Scenario) -> bool {
+        if let Some(food) = &scenario.food {
+            let food_selection = if food.cull_for_starvation {
+                entity.times_eaten > 0
+            } else {
+                true
+            };
+
+            entity.body.is_alive && food_selection
+        } else {
+            entity.body.is_alive
+        }
+    }
+
     fn start_new_generation(&mut self) {
         let selected: Vec<&Entity> = self
             .entities
             .iter()
-            .filter(|e| e.body.is_alive && e.times_eaten > 0)
+            .filter(|e| Self::selection_filter(e, &self.scenario))
             .collect();
 
         println!(
@@ -125,22 +139,29 @@ impl Automata<EntityColors> for LifeSim {
             let killzone_dir = killzone_disp.normalize();
             let danger_angle = killzone_dir.y.atan2(killzone_dir.x);
 
-            let (_, food_disp) = self
-                .scenario
-                .shortest_food_displacement((entity.body.x, entity.body.y));
+            let mut food_angle: f32 = 0.0;
 
-            let food_dist_xy = Vector2D {
-                x: food_disp.0 as f32,
-                y: food_disp.1 as f32,
-            };
+            if self.scenario.food.is_some() {
+                let (_, food_disp) = self
+                    .scenario
+                    .shortest_food_displacement((entity.body.x, entity.body.y));
 
-            let food_dir = food_dist_xy.normalize();
-            let food_angle = food_dir.y.atan2(food_dir.x);
+                let food_dist_xy = Vector2D {
+                    x: food_disp.0 as f32,
+                    y: food_disp.1 as f32,
+                };
+
+                let food_dir = food_dist_xy.normalize();
+                food_angle = food_dir.y.atan2(food_dir.x);
+            }
 
             let pos = (entity.body.x as u32, entity.body.y as u32);
-            if self.scenario.is_food_at_point(pos) {
-                self.scenario.consume_food_at_point(pos);
-                entity.times_eaten += 1;
+
+            if self.scenario.food.is_some() {
+                if self.scenario.is_food_at_point(pos) {
+                    self.scenario.consume_food_at_point(pos);
+                    entity.times_eaten += 1;
+                }
             }
 
             let decision = entity.brain.decide(
@@ -191,7 +212,7 @@ impl Automata<EntityColors> for LifeSim {
 
         let color: [u8; 4] = if entity_colors.contains_key(&(x, y)) {
             [0, 140, 200, 255]
-        } else if self.scenario.is_food_at_point((x, y)) {
+        } else if self.scenario.food.is_some() && self.scenario.is_food_at_point((x, y)) {
             [20, 200, 0, 255]
         } else {
             self.render_config.background_color
