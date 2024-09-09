@@ -862,7 +862,6 @@ name = "life-sim"
 version = "0.1.0"
 dependencies = [
  "cellular_automata",
- "colorgrad",
  "config",
  "dot-writer",
  "noise",

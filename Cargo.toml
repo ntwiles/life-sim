@@ -11,7 +11,6 @@ debug = true
 [dependencies]
 cellular_automata = { git = "https://github.com/ntwiles/cellular-automata.git" }
 config = "0.13"
-colorgrad = "0.6"
 dot-writer = "0.1"
 pixels = "0.13"
 rand = "0.8"

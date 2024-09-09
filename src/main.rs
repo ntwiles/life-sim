@@ -34,7 +34,6 @@ fn main() -> Result<(), Error> {
         background_color: settings.render_background_color,
         viewport_width: settings.render_pixel_scale * settings.grid_width,
         viewport_height: settings.render_pixel_scale * settings.grid_height,
-        color_gradient: colorgrad::rainbow(),
     };
 
     let entity_config = EntityConfig {
