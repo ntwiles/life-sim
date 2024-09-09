@@ -11,9 +11,9 @@ the [r] key.
 
 ## Usage
 
-- (Optional) create a scenario. Examples are found in `./data/scenarios`.
-- Choose a scenario (currently by changing the `load_scenario` hardcoded value in `main.rs`).
-- Run the simulation with `cargo run --release`.
+1. (Optional) create a scenario. Examples are found in `./data/scenarios`.
+2. Choose a scenario (currently by changing the `load_scenario` hardcoded value in `main.rs`).
+3. Run the simulation with `cargo run --release`.
 
 ## Tools
 
