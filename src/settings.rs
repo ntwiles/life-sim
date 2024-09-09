@@ -9,7 +9,7 @@ impl Evolution {}
 #[derive(Debug, Deserialize)]
 pub struct Settings {
     pub entity_start_count: u32,
-    pub entity_child_count: u32,
+    pub entity_survivor_child_count: u32,
     pub entity_survivor_breed_rate: f32,
 
     pub grid_width: u32,

@@ -1,7 +1,8 @@
 # TODO: Move these to scenario
-entity_child_count = 2
 entity_start_count = 3000
 entity_survivor_breed_rate = 0.25
+entity_survivor_child_count = 4   # TODO: Should this just be derived from breed rate?
+
 
 grid_width = 150
 grid_height = 150

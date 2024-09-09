@@ -38,8 +38,8 @@ fn main() -> Result<(), Error> {
     };
 
     let entity_config = EntityConfig {
-        child_count: settings.entity_child_count,
         start_count: settings.entity_start_count,
+        survivor_child_count: settings.entity_survivor_child_count,
         survivor_breed_rate: settings.entity_survivor_breed_rate,
     };
 

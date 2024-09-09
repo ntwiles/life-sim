@@ -62,7 +62,8 @@ pub fn spawn_next_generation(
     mut selected: Vec<Entity>,
 ) -> Vec<Entity> {
     if limit_population {
-        let max_population = (entity_config.start_count / entity_config.child_count) as usize;
+        let max_population =
+            (entity_config.start_count / entity_config.survivor_child_count) as usize;
         selected.sort_by(|a, b| b.times_eaten.cmp(&a.times_eaten));
         selected.truncate(max_population);
     }
@@ -72,7 +73,7 @@ pub fn spawn_next_generation(
 
     // Create children for each selected entity.
     for Entity { brain, .. } in selected {
-        for _ in 0..entity_config.child_count {
+        for _ in 0..entity_config.survivor_child_count {
             let mut genome = brain.genome.clone();
 
             let roll = rand::random::<f32>();
