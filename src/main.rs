@@ -30,7 +30,7 @@ fn main() -> Result<(), Error> {
 
     let render_config = RenderConfig {
         pixel_scale: settings.render_pixel_scale,
-        killzone_color: settings.render_killzone_color,
+        rad_zone_color: settings.render_rad_zone_color,
         background_color: settings.render_background_color,
         viewport_width: settings.render_pixel_scale * settings.grid_width,
         viewport_height: settings.render_pixel_scale * settings.grid_height,
@@ -53,7 +53,7 @@ fn main() -> Result<(), Error> {
         mutation_rate: settings.neural_network_mutation_rate,
     };
 
-    let scenario_file = load_scenario("wave").unwrap();
+    let scenario_file = load_scenario("buffet").unwrap();
     let scenario = Scenario::from_file(scenario_file, grid_config.width, grid_config.height);
 
     let sim = Box::new(LifeSim::new(

@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use serde_json::{self, Error};
 
-use crate::scenario::kill_zone::KillZone;
+use crate::scenario::radiation_zone::RadiationZone;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -12,13 +12,19 @@ pub struct FoodFile {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ScenarioFile {
-    pub kill_zones: Vec<KillZone>,
+pub struct RadiationFile {
+    pub death_threshold: Option<u32>,
+    pub zones: Vec<RadiationZone>,
+}
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScenarioFile {
     pub supplement_population: bool,
     pub limit_population: bool,
 
     pub food: Option<FoodFile>,
+    pub radiation: Option<RadiationFile>,
 }
 
 pub fn load_scenario(scenario_name: &str) -> Result<ScenarioFile, Error> {

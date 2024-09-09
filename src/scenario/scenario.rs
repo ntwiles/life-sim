@@ -5,19 +5,17 @@ use crate::{services::scenarios::ScenarioFile, vector_2d::Vector2D};
 
 use super::{
     food::{generate_food, ScenarioFood},
-    kill_zone::KillZone,
+    radiation_zone::ScenarioRadiation,
 };
 
 #[derive(Deserialize)]
 pub struct Scenario {
     pub generation_step_count: usize,
 
-    pub starting_kill_zones: Vec<KillZone>,
-    pub remaining_kill_zones: Vec<usize>,
-    pub active_kill_zones: Vec<usize>,
-
     pub supplement_population: bool,
     pub limit_population: bool,
+
+    pub radiation: Option<ScenarioRadiation>,
 
     pub food: Option<ScenarioFood>,
 
@@ -27,13 +25,26 @@ pub struct Scenario {
 
 impl Scenario {
     pub fn from_file(config: ScenarioFile, grid_width: u32, grid_height: u32) -> Self {
-        let starting_kill_zones = config.kill_zones;
+        let mut generation_step_count = 0;
 
-        let generation_step_count = starting_kill_zones
-            .iter()
-            .map(|kz| kz.end_time)
-            .max()
-            .unwrap();
+        let radiation = if let Some(radiation_config) = config.radiation {
+            let starting_rad_zones = radiation_config.zones;
+
+            generation_step_count = starting_rad_zones
+                .iter()
+                .map(|kz| kz.end_time)
+                .max()
+                .unwrap();
+
+            Some(ScenarioRadiation {
+                death_threshold: radiation_config.death_threshold,
+                remaining_rad_zones: (0..starting_rad_zones.len()).collect(),
+                starting_rad_zones,
+                active_rad_zones: Vec::new(),
+            })
+        } else {
+            None
+        };
 
         let food = if let Some(food_config) = config.food {
             let (food_map, food_positions) = generate_food(
@@ -54,9 +65,7 @@ impl Scenario {
 
         Self {
             generation_step_count,
-            remaining_kill_zones: (0..starting_kill_zones.len()).collect(),
-            starting_kill_zones,
-            active_kill_zones: Vec::new(),
+            radiation,
             food,
             grid_width,
             grid_height,
@@ -66,8 +75,10 @@ impl Scenario {
     }
 
     pub fn reset(&mut self) {
-        self.remaining_kill_zones = (0..self.starting_kill_zones.len()).collect();
-        self.active_kill_zones = Vec::new();
+        if let Some(radiation) = &mut self.radiation {
+            radiation.remaining_rad_zones = (0..radiation.starting_rad_zones.len()).collect();
+            radiation.active_rad_zones = Vec::new();
+        }
 
         if let Some(food) = &mut self.food {
             let (food_map, food_positions) = generate_food(
@@ -85,28 +96,34 @@ impl Scenario {
         // TODO: We can know how many steps away the next need for an update is. We can skip
         // updating until that point.
 
-        self.remaining_kill_zones
-            .retain(|kzi| current_step < self.starting_kill_zones[*kzi].end_time);
+        if let Some(radiation) = &mut self.radiation {
+            radiation
+                .remaining_rad_zones
+                .retain(|kzi| current_step < radiation.starting_rad_zones[*kzi].end_time);
 
-        self.active_kill_zones =
-            self.remaining_kill_zones
-                .iter()
-                .fold(Vec::new(), |mut acc, kzi| {
-                    let kz = &self.starting_kill_zones[*kzi];
-                    if current_step >= kz.start_time && current_step <= kz.end_time {
-                        acc.push(*kzi);
-                    }
+            radiation.active_rad_zones =
+                radiation
+                    .remaining_rad_zones
+                    .iter()
+                    .fold(Vec::new(), |mut acc, kzi| {
+                        let kz = &radiation.starting_rad_zones[*kzi];
+                        if current_step >= kz.start_time && current_step <= kz.end_time {
+                            acc.push(*kzi);
+                        }
 
-                    acc
-                });
+                        acc
+                    });
+        }
     }
 
-    pub fn shortest_killzone_displacement(&self, (x, y): (u32, u32)) -> (f32, Vector2D) {
+    pub fn shortest_rad_zone_displacement(&self, (x, y): (u32, u32)) -> (f32, Vector2D) {
         let mut min_dist = f32::MAX;
         let mut min_disp = Vector2D { x: 0.0, y: 0.0 };
 
-        for i in &self.active_kill_zones {
-            let kz = &self.starting_kill_zones[*i];
+        let radiation = self.radiation.as_ref().unwrap();
+
+        for i in &radiation.active_rad_zones {
+            let kz = &radiation.starting_rad_zones[*i];
 
             let dx: i32 = if x < kz.position.0 {
                 kz.position.0 as i32 - x as i32
@@ -178,9 +195,11 @@ impl Scenario {
         food.food_positions.retain(|&(fx, fy)| fx != x || fy != y);
     }
 
-    pub fn is_point_in_kill_zone(&self, (x, y): (u32, u32), generation_time: usize) -> bool {
-        self.active_kill_zones.iter().any(|i| {
-            let kz = &self.starting_kill_zones[*i];
+    pub fn is_point_in_rad_zone(&self, (x, y): (u32, u32), generation_time: usize) -> bool {
+        let radiation = self.radiation.as_ref().unwrap();
+
+        radiation.active_rad_zones.iter().any(|i| {
+            let kz = &radiation.starting_rad_zones[*i];
             generation_time >= kz.start_time
                 && generation_time <= kz.end_time
                 && x >= kz.position.0

@@ -19,7 +19,7 @@ pub struct Settings {
 
     pub neural_network_mutation_rate: f32,
 
-    pub render_killzone_color: [u8; 4],
+    pub render_rad_zone_color: [u8; 4],
     pub render_background_color: [u8; 4],
     pub render_pixel_scale: u32,
 

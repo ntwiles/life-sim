@@ -14,6 +14,7 @@ pub struct Entity {
     pub brain: Brain,
     pub body: Body,
     pub times_eaten: u32,
+    pub times_irradiated: u32,
 }
 
 fn spawn_entity(
@@ -28,6 +29,7 @@ fn spawn_entity(
         brain,
         body,
         times_eaten: 0,
+        times_irradiated: 0,
     }
 }
 

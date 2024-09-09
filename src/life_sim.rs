@@ -124,20 +124,28 @@ impl Automata<EntityColors> for LifeSim {
                 continue;
             }
 
-            if self
-                .scenario
-                .is_point_in_kill_zone((entity.body.x, entity.body.y), self.sim_current_step)
-            {
-                entity.body.is_alive = false;
-                continue;
-            }
+            if let Some(radiation) = self.scenario.radiation.as_ref() {
+                if self
+                    .scenario
+                    .is_point_in_rad_zone((entity.body.x, entity.body.y), self.sim_current_step)
+                {
+                    entity.times_irradiated += 1;
 
-            let (killzone_dist, killzone_disp) = self
-                .scenario
-                .shortest_killzone_displacement((entity.body.x, entity.body.y));
+                    if let Some(death_threshold) = radiation.death_threshold {
+                        if entity.times_irradiated >= death_threshold {
+                            entity.body.is_alive = false;
+                            continue;
+                        }
+                    }
+                }
+            };
 
-            let killzone_dir = killzone_disp.normalize();
-            let danger_angle = killzone_dir.y.atan2(killzone_dir.x);
+            let (rad_zone_dist, rad_zone_disp) = self
+                .scenario
+                .shortest_rad_zone_displacement((entity.body.x, entity.body.y));
+
+            let rad_zone_dir = rad_zone_disp.normalize();
+            let danger_angle = rad_zone_dir.y.atan2(rad_zone_dir.x);
 
             let mut food_angle: f32 = 0.0;
 
@@ -166,7 +174,7 @@ impl Automata<EntityColors> for LifeSim {
 
             let decision = entity.brain.decide(
                 generation_time,
-                killzone_dist,
+                rad_zone_dist,
                 danger_angle.sin(),
                 danger_angle.cos(),
                 food_angle.sin(),
@@ -220,9 +228,9 @@ impl Automata<EntityColors> for LifeSim {
 
         let color = if self
             .scenario
-            .is_point_in_kill_zone((x, y), self.sim_current_step)
+            .is_point_in_rad_zone((x, y), self.sim_current_step)
         {
-            additive_blend(self.render_config.killzone_color, color)
+            additive_blend(self.render_config.rad_zone_color, color)
         } else {
             color
         };
